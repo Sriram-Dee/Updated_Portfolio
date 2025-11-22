@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0f172a;
+  --color-secondary: #1e293b;
+  --color-accent: #38bdf8;
+  --font-sans: 'Inter', sans-serif;
+
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-shine: shine 5s linear infinite;
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes shine {
+    0% { background-position: 100%; }
+    100% { background-position: -100%; }
+  }
+}
+
+/* Custom utilities if needed, but v4 handles most things automatically */
+body {
+  background-color: var(--color-primary);
+  color: white;
+  font-family: var(--font-sans);
+}

@@ -1,0 +1,106 @@
+.gooey-nav-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* Define colors for particles */
+  --color-1: #38bdf8; /* Sky 400 */
+  --color-2: #818cf8; /* Indigo 400 */
+  --color-3: #c084fc; /* Purple 400 */
+  --color-4: #2dd4bf; /* Teal 400 */
+}
+
+.gooey-nav-container nav ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.gooey-nav-container nav li {
+  margin: 0 10px;
+  position: relative;
+}
+
+.gooey-nav-container nav li a {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  padding: 8px 16px;
+  display: block;
+  transition: color 0.3s ease;
+}
+
+.gooey-nav-container nav li.active a {
+  color: white;
+}
+
+.effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.effect.filter {
+  filter: url('#gooey-filter');
+  background: transparent;
+  opacity: 1;
+  z-index: 1;
+  overflow: visible;
+}
+
+.effect.text {
+  background: #38bdf8; /* Accent color */
+  border-radius: 20px;
+  z-index: 1;
+  mix-blend-mode: normal;
+}
+
+.particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  /* Trigger animation immediately */
+  animation: particle-animation var(--time) forwards;
+}
+
+/* Removed .particle.active selector as JS doesn't seem to add it to particles */
+
+@keyframes particle-animation {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--end-x)), calc(-50% + var(--end-y))) scale(var(--scale)) rotate(var(--rotate));
+    opacity: 0;
+  }
+}
+
+.point {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+}

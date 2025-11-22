@@ -1,0 +1,109 @@
+{
+  "profile": {
+    "name": "Sriram R",
+    "avatar": "/uploads/1763852896291-IMG_20251121_224245.jpg",
+    "title": "Junior Software Engineer",
+    "email": "sriram14jeeva12@gmail.com",
+    "phone": "+91 8667286277",
+    "location": "Cuddalore, India",
+    "github": "https://github.com/Sriram-Dee",
+    "linkedin": "https://www.linkedin.com/in/sriram-r-14s26d2019l",
+    "summary": "Results-driven Junior Full-Stack Developer with 1.8+ years of experience in building responsive, user-friendly web applications. Proficient in React.js, Redux, Three.js, React Three Fiber, Ant Design, MUI, Node.js, Express.js, RESTful APIs, and MongoDB. Hands-on with DevOps & deployment using Linux, Docker, Nginx, PM2, and SSH. Skilled in version control with Git/GitHub and practiced in Agile environments."
+  },
+  "skills": {
+    "Frontend": [
+      "React.js",
+      "Redux",
+      "Three.js",
+      "React Three Fiber",
+      "Ant Design (Antd)",
+      "Material UI (MUI)",
+      "JavaScript",
+      "Bootstrap",
+      "Tailwind CSS"
+    ],
+    "Backend": [
+      "Node.js",
+      "Express.js",
+      "RESTful APIs",
+      "JWT",
+      "Multer",
+      "GridFS",
+      "MongoDB"
+    ],
+    "DevOps": [
+      "Linux",
+      "Docker",
+      "Docker Compose",
+      "Nginx",
+      "PM2",
+      "SSH",
+      "HTTPS Setup"
+    ],
+    "Tools": [
+      "Termius",
+      "PuTTY",
+      "Git/GitHub",
+      "VS Code"
+    ]
+  },
+  "professional_skills": [
+    "Full-Stack Application Development",
+    "Version Control and Code Management (Git/GitHub)",
+    "Analytical Thinking & Problem Solving",
+    "Attention to Detail and Code Optimization",
+    "Continuous Learning and Adaptability"
+  ],
+  "projects": [
+    {
+      "name": "SEC Training Management System",
+      "technologies": "React.js, Node.js, MongoDB",
+      "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
+      "period": "March 2025 – Present",
+      "images": []
+    },
+    {
+      "name": "Tune For 2",
+      "technologies": "React.js, Spring Boot, MongoDB",
+      "description": "Built a custom song ordering platform with React front-end and Java Spring Boot backend.",
+      "period": "April 2024 – September 2024",
+      "images": []
+    }
+  ],
+  "experience": [
+    {
+      "role": "Junior Developer",
+      "company": "Hema's Enterprise Pvt Ltd",
+      "location": "Cuddalore",
+      "period": "March 2024 – Present",
+      "description": "Developed full-stack apps using React.js, Node.js, and MongoDB with RESTful APIs. Implemented JWT authentication, GridFS file management, and handled DevOps deployment using Docker, Nginx, and PM2. Collaborated in Agile sprints and managed version control with Git/GitHub."
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Commerce",
+      "institution": "St. Joseph's College of Arts And Science - Autonomous",
+      "location": "Cuddalore, India",
+      "period": "2017 – 2020"
+    }
+  ],
+  "certifications": [
+    "Front-End Development (Login-360)",
+    "HTML & CSS (Udemy)",
+    "Java Foundations (Udemy)",
+    "JavaScript (Udemy)",
+    "MySQL (Udemy)",
+    "Diploma in Computer Applications (CSC)"
+  ],
+  "awards": [
+    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
+  ],
+  "languages": [
+    "Tamil",
+    "English"
+  ],
+  "links": {
+    "website_1": "https://tms.digifox.studio/",
+    "website_2": "https://tunefor2.com/"
+  }
+}

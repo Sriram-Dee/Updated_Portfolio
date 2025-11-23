@@ -103,7 +103,7 @@ async function updateDataInGitHub(newData) {
       {
         method: "PUT",
         headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
+          Authorization: `Bearer ${GITHUB_TOKEN}`,
           Accept: "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
@@ -116,14 +116,15 @@ async function updateDataInGitHub(newData) {
     );
 
     if (!updateResponse.ok) {
-      throw new Error(`GitHub API error: ${updateResponse.statusText}`);
+      const errorData = await updateResponse.json().catch(() => ({}));
+      console.error("GitHub API error details:", errorData);
+      throw new Error(`GitHub API error: ${updateResponse.statusText} - ${JSON.stringify(errorData)}`);
     }
 
-    console.log("Portfolio data updated in GitHub");
+    console.log("Portfolio data updated in GitHub successfully");
   } catch (error) {
     console.error("Error updating GitHub:", error);
-    // Fallback to local file
-    fs.writeFileSync(DATA_FILE, JSON.stringify(newData, null, 2));
+    throw error; // Re-throw error instead of trying to write to local file
   }
 }
 

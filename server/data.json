@@ -111,5 +111,16 @@
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/"
-  }
+  },
+  "achievements": [
+    {
+      "id": "achievement-1763912338323",
+      "type": "award",
+      "name": "Rising Star Award",
+      "issuer": "Hema's Enterprise Pvt Ltd",
+      "date": "2025-03-16",
+      "description": "Recognition for outstanding performance",
+      "image": null
+    }
+  ]
 }

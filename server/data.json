@@ -116,6 +116,24 @@
       "date": "2025-03-16",
       "description": "Recognition for outstanding performance",
       "image": null
+    },
+    {
+      "id": "achievement-1763921730677",
+      "type": "certification",
+      "name": "Frontend Development ",
+      "issuer": "Login-360 (Chennai)",
+      "date": "2024-02-16",
+      "description": "",
+      "image": null
+    },
+    {
+      "id": "achievement-1763921826227",
+      "type": "certification",
+      "name": "HTML & CSS",
+      "issuer": "YouAccel Training (Udemy)",
+      "date": "2025-11-23",
+      "description": "",
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763922078/portfolio/xns2kz5gn96anb1krtkq.jpg"
     }
   ]
 }

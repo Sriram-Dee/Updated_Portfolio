@@ -2,49 +2,135 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const multer = require("multer");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const cloudinary = require("cloudinary").v2;
+const multiparty = require("multiparty");
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// JWT Secret (use environment variable in production)
+// JWT Secret
 const JWT_SECRET =
   process.env.JWT_SECRET ||
   "your-super-secret-jwt-key-change-this-in-production";
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// GitHub Configuration
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_OWNER = process.env.GITHUB_OWNER; // Your GitHub username
+const GITHUB_REPO = process.env.GITHUB_REPO; // Repository name
+const GITHUB_FILE_PATH = "server/data.json"; // Path to data file in repo
+
+// Data File Path (for local development)
+const DATA_FILE = path.join(__dirname, "data.json");
+
+// Helper: Fetch data from GitHub
+async function fetchDataFromGitHub() {
+  if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+    // Fallback to local file if GitHub not configured
+    console.log("GitHub not configured, using local file");
+    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,
+      {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = Buffer.from(data.content, "base64").toString("utf8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error fetching from GitHub:", error);
+    // Fallback to local file
+    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  }
 }
 
-// Storage for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
+// Helper: Update data in GitHub
+async function updateDataInGitHub(newData) {
+  if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+    // Fallback to local file if GitHub not configured
+    console.log("GitHub not configured, saving to local file");
+    fs.writeFileSync(DATA_FILE, JSON.stringify(newData, null, 2));
+    return;
+  }
 
-// Data File Path
-const DATA_FILE = path.join(__dirname, "data.json");
+  try {
+    // Get current file SHA
+    const getResponse = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,
+      {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
+    );
+
+    const currentFile = await getResponse.json();
+    const sha = currentFile.sha;
+
+    // Update file
+    const content = Buffer.from(JSON.stringify(newData, null, 2)).toString(
+      "base64"
+    );
+
+    const updateResponse = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: "Update portfolio data via admin panel",
+          content: content,
+          sha: sha,
+        }),
+      }
+    );
+
+    if (!updateResponse.ok) {
+      throw new Error(`GitHub API error: ${updateResponse.statusText}`);
+    }
+
+    console.log("Portfolio data updated in GitHub");
+  } catch (error) {
+    console.error("Error updating GitHub:", error);
+    // Fallback to local file
+    fs.writeFileSync(DATA_FILE, JSON.stringify(newData, null, 2));
+  }
+}
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ error: "Access token required" });
@@ -59,66 +145,136 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Rate limiting for contact form (server-side protection)
+const contactRateLimiter = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 60 seconds
+const MAX_REQUESTS = 1; // 1 request per window
+
+const checkRateLimit = (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (contactRateLimiter.has(ip)) {
+    const { count, firstRequest } = contactRateLimiter.get(ip);
+    
+    if (now - firstRequest < RATE_LIMIT_WINDOW) {
+      if (count >= MAX_REQUESTS) {
+        const remainingTime = Math.ceil((RATE_LIMIT_WINDOW - (now - firstRequest)) / 1000);
+        return res.status(429).json({ 
+          error: `Too many requests. Please wait ${remainingTime} seconds.` 
+        });
+      }
+      contactRateLimiter.set(ip, { count: count + 1, firstRequest });
+    } else {
+      // Reset if window expired
+      contactRateLimiter.set(ip, { count: 1, firstRequest: now });
+    }
+  } else {
+    contactRateLimiter.set(ip, { count: 1, firstRequest: now });
+  }
+  
+  next();
+};
+
+// Cleanup old rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of contactRateLimiter.entries()) {
+    if (now - data.firstRequest > RATE_LIMIT_WINDOW) {
+      contactRateLimiter.delete(ip);
+    }
+  }
+}, 300000);
+
 // Routes
 
 // Get Portfolio Data (public)
-app.get("/api/portfolio", (req, res) => {
-  fs.readFile(DATA_FILE, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to read data" });
-    }
-    res.json(JSON.parse(data));
-  });
+app.get("/api/portfolio", async (req, res) => {
+  try {
+    const data = await fetchDataFromGitHub();
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to read data" });
+  }
 });
 
 // Update Portfolio Data (protected)
-app.post("/api/portfolio", authenticateToken, (req, res) => {
-  const newData = req.body;
-  fs.writeFile(DATA_FILE, JSON.stringify(newData, null, 2), (err) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to save data" });
-    }
+app.post("/api/portfolio", authenticateToken, async (req, res) => {
+  try {
+    const newData = req.body;
+    await updateDataInGitHub(newData);
     res.json({ message: "Data updated successfully", data: newData });
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to save data" });
+  }
 });
 
-// Upload File (protected) - Return relative path
-app.post(
-  "/api/upload",
-  authenticateToken,
-  upload.single("file"),
-  (req, res) => {
-    if (!req.file) {
+// Upload File to Cloudinary (protected)
+app.post("/api/upload", authenticateToken, (req, res) => {
+  // Check Cloudinary configuration
+  if (
+    !process.env.CLOUDINARY_CLOUD_NAME ||
+    !process.env.CLOUDINARY_API_KEY ||
+    !process.env.CLOUDINARY_API_SECRET
+  ) {
+    return res.status(500).json({ error: "Cloudinary configuration missing" });
+  }
+
+  // Parse multipart form data
+  const form = new multiparty.Form();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error("Form parse error:", err);
+      return res.status(400).json({ error: "Failed to parse upload" });
+    }
+
+    if (!files.file || !files.file[0]) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // Return relative path only
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const file = files.file[0];
 
-    console.log(`File uploaded: ${fileUrl}`); // For debugging
-    res.json({ url: fileUrl, filename: req.file.filename });
-  }
-);
+    try {
+      // Upload to Cloudinary
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "portfolio",
+        resource_type: "auto",
+      });
 
-// Serve uploaded files with proper CORS headers
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-    next();
-  },
-  express.static(path.join(__dirname, "uploads"))
-);
+      console.log(`File uploaded to Cloudinary: ${result.secure_url}`);
 
-// Contact Email (public)
-app.post("/api/contact", async (req, res) => {
+      res.json({
+        url: result.secure_url,
+        filename: result.public_id,
+        cloudinary_id: result.public_id,
+      });
+    } catch (uploadError) {
+      console.error("Cloudinary upload error:", uploadError);
+      res.status(500).json({ error: "Failed to upload file" });
+    }
+  });
+});
+
+
+// Contact Email (public with rate limiting)
+app.post("/api/contact", checkRateLimit, async (req, res) => {
   const { name, email, message } = req.body;
+
+  // Server-side validation
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  if (name.trim().length < 2 || name.trim().length > 50) {
+    return res.status(400).json({ error: "Name must be 2-50 characters" });
+  }
+
+  if (message.trim().length < 10 || message.trim().length > 1000) {
+    return res.status(400).json({ error: "Message must be 10-1000 characters" });
+  }
 
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.log("Email credentials not found in .env");
@@ -155,17 +311,14 @@ app.post("/api/contact", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { password } = req.body;
 
-  // In production, store hashed password in environment variable
   const hashedPassword =
     process.env.ADMIN_PASSWORD_HASH ||
-    "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"; // default: "password"
+    "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi";
 
   try {
-    // Compare provided password with stored hash
     const isMatch = await bcrypt.compare(password, hashedPassword);
 
     if (isMatch) {
-      // Generate JWT token
       const token = jwt.sign({ userId: "admin", role: "admin" }, JWT_SECRET, {
         expiresIn: "24h",
       });
@@ -183,32 +336,25 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// Verify token endpoint (optional, for frontend to check token validity)
+// Verify token endpoint
 app.get("/api/verify", authenticateToken, (req, res) => {
   res.json({ valid: true, user: req.user });
 });
 
-// Logout endpoint (optional, token revocation would require a token blacklist)
+// Logout endpoint
 app.post("/api/logout", authenticateToken, (req, res) => {
-  // In a real application, you might want to blacklist the token
   res.json({ message: "Logged out successfully" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Uploads directory: /uploads/`);
+// For local development
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`GitHub Storage: ${GITHUB_TOKEN ? "Enabled" : "Disabled (using local file)"}`);
+    console.log(`Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? "Configured" : "Not configured"}`);
+  });
+}
 
-  // Generate default password hash for first-time setup
-  if (!process.env.ADMIN_PASSWORD_HASH) {
-    const bcrypt = require("bcryptjs");
-    const defaultPassword = "admin123";
-    bcrypt.hash(defaultPassword, 10).then((hash) => {
-      console.log("\n=== FIRST TIME SETUP ===");
-      console.log('Default password: "admin123"');
-      console.log("Add this to your .env file:");
-      console.log(`ADMIN_PASSWORD_HASH=${hash}`);
-      console.log("JWT_SECRET=your-super-secret-jwt-key-change-this");
-      console.log("=======================\n");
-    });
-  }
-});
+// Export for Vercel
+module.exports = app;

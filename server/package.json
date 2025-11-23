@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node index.js",
-    "start": "node ../backend/index.js",
+    "start": "node index.js",
     "build": "node build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,11 +15,12 @@
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2",
+    "multiparty": "^4.2.3",
     "nodemailer": "^7.0.10"
   },
   "devDependencies": {

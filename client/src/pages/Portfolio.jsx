@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
 import * as FaIcons from "react-icons/fa";
 import * as SiIcons from "react-icons/si";
 import * as TbIcons from "react-icons/tb";
@@ -22,6 +23,288 @@ import TiltedCard from "../components/reactbits/TiltedCard";
 import ScrollFloat from "../components/reactbits/ScrollFloat";
 import Particles from "../components/reactbits/Particles";
 import Proximity from "../components/reactbits/Proximity";
+import { SendIcon } from "lucide-react";
+
+// Contact Form Component with custom validation and rate limiting
+const ContactForm = () => {
+  const [loading, setLoading] = useState(false);
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const COOLDOWN_PERIOD = 60000; // 60 seconds
+
+  // Update cooldown timer
+  useEffect(() => {
+    if (cooldownRemaining > 0) {
+      const timer = setInterval(() => {
+        const remaining = Math.max(
+          0,
+          COOLDOWN_PERIOD - (Date.now() - lastSubmitTime)
+        );
+        setCooldownRemaining(remaining);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [cooldownRemaining, lastSubmitTime]);
+
+  const validateField = (name, value) => {
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          return "Name is required";
+        }
+        if (value.trim().length < 2) {
+          return "Name must be at least 2 characters";
+        }
+        if (value.trim().length > 50) {
+          return "Name must be less than 50 characters";
+        }
+        return "";
+
+      case "email":
+        if (!value.trim()) {
+          return "Email is required";
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          return "Please enter a valid email address";
+        }
+        return "";
+
+      case "message":
+        if (!value.trim()) {
+          return "Message is required";
+        }
+        if (value.trim().length < 10) {
+          return "Message must be at least 10 characters";
+        }
+        if (value.trim().length > 1000) {
+          return "Message must be less than 1000 characters";
+        }
+        return "";
+
+      default:
+        return "";
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Validate on change if field was touched
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Mark all fields as touched
+    setTouched({ name: true, email: true, message: true });
+
+    // Validate all fields
+    const newErrors = {
+      name: validateField("name", formData.name),
+      email: validateField("email", formData.email),
+      message: validateField("message", formData.message),
+    };
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    if (Object.values(newErrors).some((error) => error !== "")) {
+      return;
+    }
+
+    // Check rate limiting
+    const timeSinceLastSubmit = Date.now() - lastSubmitTime;
+    if (timeSinceLastSubmit < COOLDOWN_PERIOD) {
+      const remainingSeconds = Math.ceil(
+        (COOLDOWN_PERIOD - timeSinceLastSubmit) / 1000
+      );
+      toast.error(`Please wait ${remainingSeconds} seconds before sending another message.`, {
+        duration: 3000,
+        icon: '⏱️',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await axios.post("/api/contact", formData);
+      toast.success("Message sent successfully! I'll get back to you soon.", {
+        duration: 4000,
+        icon: '✅',
+      });
+      setFormData({ name: "", email: "", message: "" });
+      setTouched({});
+      setErrors({});
+      setLastSubmitTime(Date.now());
+      setCooldownRemaining(COOLDOWN_PERIOD);
+    } catch (err) {
+      console.error("Contact form error:", err);
+      if (err.response?.status === 429) {
+        toast.error("Too many requests. Please try again later.", {
+          duration: 4000,
+        });
+      } else if (err.response?.status === 500) {
+        toast.error("Server error. Please try again later or contact me directly via email.", {
+          duration: 5000,
+        });
+      } else {
+        toast.error("Failed to send message. Please check your connection and try again.", {
+          duration: 4000,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isCooldownActive = cooldownRemaining > 0;
+  const cooldownSeconds = Math.ceil(cooldownRemaining / 1000);
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-5 text-left" noValidate>
+      {/* Name Input */}
+      <div className="relative">
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={formData.name}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={loading || isCooldownActive}
+          className={`w-full p-3 rounded-lg bg-primary/50 border-2 transition-all duration-300 ${
+            errors.name && touched.name
+              ? "border-red-500 focus:border-red-400"
+              : "border-gray-700 focus:border-accent"
+          } outline-none text-white placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed`}
+        />
+        {errors.name && touched.name && (
+          <div className="flex items-center gap-2 mt-2 text-red-400 text-sm animate-fadeIn">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span>{errors.name}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Email Input */}
+      <div className="relative">
+        <input
+          type="email"
+          name="email"
+          placeholder="Your Email"
+          value={formData.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={loading || isCooldownActive}
+          className={`w-full p-3 rounded-lg bg-primary/50 border-2 transition-all duration-300 ${
+            errors.email && touched.email
+              ? "border-red-500 focus:border-red-400"
+              : "border-gray-700 focus:border-accent"
+          } outline-none text-white placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed`}
+        />
+        {errors.email && touched.email && (
+          <div className="flex items-center gap-2 mt-2 text-red-400 text-sm animate-fadeIn">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span>{errors.email}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Message Textarea */}
+      <div className="relative">
+        <textarea
+          name="message"
+          placeholder="Your Message"
+          value={formData.message}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          rows="4"
+          disabled={loading || isCooldownActive}
+          className={`w-full p-3 rounded-lg bg-primary/50 border-2 transition-all duration-300 ${
+            errors.message && touched.message
+              ? "border-red-500 focus:border-red-400"
+              : "border-gray-700 focus:border-accent"
+          } outline-none text-white placeholder-gray-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed`}
+        ></textarea>
+        <div className="flex justify-between items-center mt-1">
+          {errors.message && touched.message ? (
+            <div className="flex items-center gap-2 text-red-400 text-sm animate-fadeIn">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>{errors.message}</span>
+            </div>
+          ) : (
+            <span className="text-gray-500 text-xs">
+              {formData.message.length}/1000
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={loading || isCooldownActive}
+        className="w-full py-3 bg-accent text-primary font-bold rounded-lg hover:bg-opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-accent/50"
+      >
+        {loading ? (
+          <>
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span>Sending...</span>
+          </>
+        ) : isCooldownActive ? (
+          <>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Wait {cooldownSeconds}s</span>
+          </>
+        ) : (
+          <>
+            <SendIcon className="w-5 h-5" />
+            <span>Send Message</span>
+          </>
+        )}
+      </button>
+
+      {/* Rate Limit Info */}
+      {isCooldownActive && (
+        <div className="flex items-center justify-center gap-2 text-yellow-400 text-sm bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-3 animate-fadeIn">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+          </svg>
+          <span>Please wait {cooldownSeconds} seconds before sending another message</span>
+        </div>
+      )}
+    </form>
+  );
+};
 
 // Comprehensive icon mapping with exact matches
 const skillIconMappings = {
@@ -333,16 +616,40 @@ const Portfolio = () => {
       </div>
     );
 
+
   // Get projects to display - initially show 2, then all when "Show More" is clicked
   const displayedProjects = showAllProjects
     ? data.projects
-    : data.projects.slice(0, 2);
+    : data.projects?.slice(0, 2) || [];
 
   // Check if there are more projects to show
-  const hasMoreProjects = data.projects.length > 2;
+  const hasMoreProjects = data.projects?.length > 2;
 
   return (
     <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid #38bdf8',
+          },
+          success: {
+            iconTheme: {
+              primary: '#38bdf8',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <div
         style={{
           position: "fixed",
@@ -617,6 +924,7 @@ const Portfolio = () => {
           </div>
         </motion.section>
 
+
         {/* Contact Section */}
         <motion.section
           id="contact"
@@ -640,52 +948,7 @@ const Portfolio = () => {
               If you have a project that needs some creative touch, let's chat!
             </p>
 
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData.entries());
-                try {
-                  await axios.post("/api/contact", data);
-                  alert("Message sent successfully!");
-                  e.target.reset();
-                } catch (err) {
-                  alert(
-                    "Failed to send message. Please check console or try again later."
-                  );
-                  console.error(err);
-                }
-              }}
-              className="max-w-md mx-auto space-y-4 text-left"
-            >
-              <input
-                type="text"
-                name="name"
-                placeholder="Your Name"
-                required
-                className="w-full p-3 rounded bg-primary/50 border border-gray-700 focus:border-accent outline-none text-white"
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Your Email"
-                required
-                className="w-full p-3 rounded bg-primary/50 border border-gray-700 focus:border-accent outline-none text-white"
-              />
-              <textarea
-                name="message"
-                placeholder="Your Message"
-                required
-                rows="4"
-                className="w-full p-3 rounded bg-primary/50 border border-gray-700 focus:border-accent outline-none text-white"
-              ></textarea>
-              <button
-                type="submit"
-                className="w-full py-3 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition"
-              >
-                Send Message
-              </button>
-            </form>
+            <ContactForm />
           </motion.div>
         </motion.section>
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const Admin = () => {
   const [data, setData] = useState(null);
@@ -8,6 +10,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [saving, setSaving] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, onConfirm: null, title: "", message: "" });
   const navigate = useNavigate();
 
   // Helper function to get full URL for assets
@@ -64,14 +67,17 @@ const Admin = () => {
     setSaving(true);
     try {
       await axios.post("/api/portfolio", data);
-      alert("Saved successfully!");
+      toast.success("Saved successfully!", {
+        duration: 3000,
+        icon: '✅',
+      });
     } catch (err) {
       console.error("Save failed:", err);
       if (err.response?.status === 401 || err.response?.status === 403) {
-        alert("Session expired. Please login again.");
+        toast.error("Session expired. Please login again.");
         handleLogout();
       } else {
-        alert("Error saving data");
+        toast.error("Error saving data");
       }
     } finally {
       setSaving(false);
@@ -93,7 +99,7 @@ const Admin = () => {
     } catch (err) {
       console.error("Upload failed:", err);
       if (err.response?.status === 401 || err.response?.status === 403) {
-        alert("Session expired. Please login again.");
+        toast.error("Session expired. Please login again.");
         handleLogout();
       } else {
         onError("Error uploading file");
@@ -111,6 +117,36 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-primary text-white">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid #38bdf8',
+          },
+          success: {
+            iconTheme: {
+              primary: '#38bdf8',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+      />
       {/* Mobile Header */}
       <div className="lg:hidden bg-secondary p-4 border-b border-gray-700">
         <div className="flex items-center justify-between">
@@ -276,16 +312,16 @@ const Admin = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Skills:</span>
                     <span className="font-bold">
-                      {Object.values(data.skills).flat().length}
+                      {data?.skills ? Object.values(data.skills).flat().length : 0}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Experience:</span>
-                    <span className="font-bold">{data.experience.length}</span>
+                    <span className="font-bold">{data?.experience?.length || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Projects:</span>
-                    <span className="font-bold">{data.projects.length}</span>
+                    <span className="font-bold">{data?.projects?.length || 0}</span>
                   </div>
                 </div>
               </div>
@@ -365,10 +401,12 @@ const Admin = () => {
                                 file,
                                 (url) => {
                                   handleChange("profile", "avatar", url);
-                                  alert("Image uploaded successfully!");
+                                  toast.success("Image uploaded successfully!", {
+                                    icon: '🖼️',
+                                  });
                                 },
                                 (error) => {
-                                  alert(error);
+                                  toast.error(error);
                                 }
                               );
                             }}

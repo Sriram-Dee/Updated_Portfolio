@@ -13,7 +13,7 @@ const FluidImage = ({ src, alt }) => {
           ]
         }}
         transition={{
-          duration: 8,
+          duration: 2,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -30,7 +30,7 @@ const FluidImage = ({ src, alt }) => {
           ]
         }}
         transition={{
-          duration: 8,
+          duration: 4,
           repeat: Infinity,
           ease: "easeInOut"
         }}

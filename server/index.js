@@ -259,6 +259,42 @@ app.post("/api/upload", authenticateToken, (req, res) => {
   });
 });
 
+// Delete Image from Cloudinary (protected)
+app.delete("/api/upload", authenticateToken, async (req, res) => {
+  const { url } = req.body;
+
+  if (!url) {
+    return res.status(400).json({ error: "Image URL is required" });
+  }
+
+  try {
+    // Extract public_id from Cloudinary URL
+    // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/{public_id}.{format}
+    const urlParts = url.split('/');
+    const uploadIndex = urlParts.findIndex(part => part === 'upload');
+    
+    if (uploadIndex === -1) {
+      return res.status(400).json({ error: "Invalid Cloudinary URL" });
+    }
+
+    // Get everything after 'upload/' and before the file extension
+    const pathAfterUpload = urlParts.slice(uploadIndex + 1).join('/');
+    const publicId = pathAfterUpload.split('.')[0];
+
+    // Delete from Cloudinary
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    if (result.result === 'ok') {
+      res.json({ message: "Image deleted successfully", publicId });
+    } else {
+      res.status(404).json({ error: "Image not found or already deleted" });
+    }
+  } catch (error) {
+    console.error("Cloudinary delete error:", error);
+    res.status(500).json({ error: "Failed to delete image" });
+  }
+});
+
 
 // Contact Email (public with rate limiting)
 app.post("/api/contact", checkRateLimit, async (req, res) => {

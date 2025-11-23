@@ -105,5 +105,16 @@
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/"
-  }
+  },
+  "achievements": [
+    {
+      "id": "award-1",
+      "type": "award",
+      "name": "Rising Star Award (2025)",
+      "issuer": "Hema's Enterprise Pvt Ltd",
+      "date": "2025-01-01",
+      "description": "Recognition for outstanding performance and contribution to the company",
+      "image": null
+    }
+  ]
 }

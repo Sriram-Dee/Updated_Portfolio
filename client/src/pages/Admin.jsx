@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import ConfirmDialog from "../components/ConfirmDialog";
+import ImagePreview from "../components/ImagePreview";
 
 const Admin = () => {
   const [data, setData] = useState(null);
@@ -11,6 +12,10 @@ const Admin = () => {
   const [saving, setSaving] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, onConfirm: null, title: "", message: "" });
+  const [stagedImages, setStagedImages] = useState({
+    profile: null,      // { file: File, preview: string, oldUrl: string }
+    achievements: {},   // { achievementId: { file, preview } }
+  });
   const navigate = useNavigate();
 
   // Helper function to get full URL for assets
@@ -66,7 +71,70 @@ const Admin = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await axios.post("/api/portfolio", data);
+      // Upload all staged images first
+      const uploadPromises = [];
+      
+      // Upload profile image if staged
+      if (stagedImages.profile) {
+        uploadPromises.push(
+          handleFileUpload(stagedImages.profile.file)
+            .then(async (url) => {
+              // Delete old image from Cloudinary
+              if (stagedImages.profile.oldUrl && stagedImages.profile.oldUrl.startsWith('http')) {
+                await deleteCloudinaryImage(stagedImages.profile.oldUrl);
+              }
+              return { type: 'profile', url };
+            })
+        );
+      }
+      
+      // Upload achievement images if staged
+      Object.entries(stagedImages.achievements).forEach(([id, imageData]) => {
+        if (imageData.file) {
+          uploadPromises.push(
+            handleFileUpload(imageData.file)
+              .then(async (url) => {
+                if (imageData.oldUrl && imageData.oldUrl.startsWith('http')) {
+                  await deleteCloudinaryImage(imageData.oldUrl);
+                }
+                return { type: 'achievement', id, url };
+              })
+          );
+        }
+      });
+      
+      // Wait for all uploads
+      const uploadResults = await Promise.all(uploadPromises);
+      
+      // Update data with new URLs
+      const updatedData = { ...data };
+      uploadResults.forEach(({ type, url, id }) => {
+        if (type === 'profile') {
+          updatedData.profile.avatar = url;
+        } else if (type === 'achievement') {
+          const achievement = updatedData.achievements.find(a => a.id === id);
+          if (achievement) {
+            achievement.image = url;
+          }
+        }
+      });
+      
+      // Save to GitHub
+      await axios.post("/api/portfolio", updatedData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      
+      // Update local state
+      setData(updatedData);
+      
+      // Clear staged images
+      setStagedImages({
+        profile: null,
+        achievements: {},
+      });
+      
       toast.success("Saved successfully!", {
         duration: 3000,
         icon: '✅',
@@ -84,26 +152,60 @@ const Admin = () => {
     }
   };
 
-  const handleFileUpload = async (file, onSuccess, onError) => {
+  // Upload file to Cloudinary (returns promise)
+  const handleFileUpload = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
+    const res = await axios.post("/api/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return res.data.url;
+  };
+
+  // Delete image from Cloudinary
+  const deleteCloudinaryImage = async (url) => {
     try {
-      const res = await axios.post("/api/upload", formData, {
+      await axios.delete("/api/upload", {
+        data: { url },
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      onSuccess(res.data.url);
     } catch (err) {
-      console.error("Upload failed:", err);
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        toast.error("Session expired. Please login again.");
-        handleLogout();
-      } else {
-        onError("Error uploading file");
+      console.error("Failed to delete image:", err);
+      // Don't throw error, just log it
+    }
+  };
+
+  // Stage image for upload (preview only)
+  const stageProfileImage = (file) => {
+    const preview = URL.createObjectURL(file);
+    setStagedImages(prev => ({
+      ...prev,
+      profile: {
+        file,
+        preview,
+        oldUrl: data.profile.avatar
       }
+    }));
+    // Update data with preview URL for immediate display
+    handleChange("profile", "avatar", preview);
+  };
+
+  // Remove staged profile image
+  const removeStagedProfileImage = () => {
+    if (stagedImages.profile) {
+      URL.revokeObjectURL(stagedImages.profile.preview);
+      setStagedImages(prev => ({
+        ...prev,
+        profile: null
+      }));
+      // Restore old URL
+      handleChange("profile", "avatar", stagedImages.profile.oldUrl);
     }
   };
 
@@ -283,6 +385,7 @@ const Admin = () => {
                     { id: "skills", label: "Skills", icon: "💡" },
                     { id: "experience", label: "Experience", icon: "💼" },
                     { id: "projects", label: "Projects", icon: "🚀" },
+                    { id: "achievements", label: "Achievements", icon: "🏆" },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -393,25 +496,20 @@ const Admin = () => {
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={async (e) => {
+                            onChange={(e) => {
                               const file = e.target.files[0];
                               if (!file) return;
-
-                              handleFileUpload(
-                                file,
-                                (url) => {
-                                  handleChange("profile", "avatar", url);
-                                  toast.success("Image uploaded successfully!", {
-                                    icon: '🖼️',
-                                  });
-                                },
-                                (error) => {
-                                  toast.error(error);
-                                }
-                              );
+                              stageProfileImage(file);
+                              e.target.value = ''; // Reset input
                             }}
                             className="w-full text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
                           />
+                          {stagedImages.profile && (
+                            <p className="text-yellow-500 text-sm mt-2 flex items-center gap-2">
+                              <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                              Image staged - click Save to upload
+                            </p>
+                          )}
                           <p className="text-xs text-gray-500 mt-2">
                             Recommended: Square image, 400x400px or larger
                           </p>
@@ -894,6 +992,227 @@ const Admin = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Achievements Tab */}
+                {activeTab === "achievements" && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <h2 className="text-2xl font-bold text-accent">
+                        Certifications & Awards
+                      </h2>
+                      <button
+                        onClick={() => {
+                          const newAchievement = {
+                            id: `achievement-${Date.now()}`,
+                            type: 'certification',
+                            name: '',
+                            issuer: '',
+                            date: new Date().toISOString().split('T')[0],
+                            description: '',
+                            image: null
+                          };
+                          setData((prev) => ({
+                            ...prev,
+                            achievements: [...(prev.achievements || []), newAchievement],
+                          }));
+                        }}
+                        className="px-4 py-2 lg:px-6 lg:py-3 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 whitespace-nowrap"
+                      >
+                        <span>+</span> Add New Achievement
+                      </button>
+                    </div>
+
+                    <div className="space-y-4 lg:space-y-6">
+                      {(data.achievements || []).map((achievement, index) => (
+                        <div
+                          key={achievement.id}
+                          className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700 relative group"
+                        >
+                          <button
+                            onClick={() => {
+                              setConfirmDialog({
+                                isOpen: true,
+                                title: "Delete Achievement?",
+                                message: `Are you sure you want to delete "${achievement.name}"? This action cannot be undone.`,
+                                onConfirm: async () => {
+                                  // Delete image from Cloudinary if exists
+                                  if (achievement.image && achievement.image.startsWith('http')) {
+                                    await deleteCloudinaryImage(achievement.image);
+                                  }
+                                  const newList = data.achievements.filter((_, i) => i !== index);
+                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                }
+                              });
+                            }}
+                            className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Delete achievement"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Type
+                              </label>
+                              <select
+                                value={achievement.type}
+                                onChange={(e) => {
+                                  const newList = [...data.achievements];
+                                  newList[index].type = e.target.value;
+                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                }}
+                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                              >
+                                <option value="certification">Certification</option>
+                                <option value="award">Award</option>
+                              </select>
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Date Received
+                              </label>
+                              <input
+                                type="date"
+                                value={achievement.date}
+                                onChange={(e) => {
+                                  const newList = [...data.achievements];
+                                  newList[index].date = e.target.value;
+                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                }}
+                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                {achievement.type === 'certification' ? 'Certification' : 'Award'} Name
+                              </label>
+                              <input
+                                type="text"
+                                value={achievement.name}
+                                onChange={(e) => {
+                                  const newList = [...data.achievements];
+                                  newList[index].name = e.target.value;
+                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                }}
+                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g., AWS Certified Solutions Architect"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Issued By / Organization
+                              </label>
+                              <input
+                                type="text"
+                                value={achievement.issuer}
+                                onChange={(e) => {
+                                  const newList = [...data.achievements];
+                                  newList[index].issuer = e.target.value;
+                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                }}
+                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g., Amazon Web Services"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 mb-4">
+                            <label className="block text-sm font-medium text-gray-400">
+                              Description (Optional)
+                            </label>
+                            <textarea
+                              value={achievement.description || ''}
+                              onChange={(e) => {
+                                const newList = [...data.achievements];
+                                newList[index].description = e.target.value;
+                                setData((prev) => ({ ...prev, achievements: newList }));
+                              }}
+                              className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-24 resize-none transition-colors"
+                              placeholder="Brief description of the achievement..."
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-400">
+                              Certificate/Award Image (Optional)
+                            </label>
+                            <div className="flex items-center gap-4">
+                              {achievement.image && (
+                                <ImagePreview
+                                  src={getAssetUrl(achievement.image)}
+                                  onRemove={() => {
+                                    const newList = [...data.achievements];
+                                    newList[index].image = null;
+                                    setData((prev) => ({ ...prev, achievements: newList }));
+                                    // Remove from staged images
+                                    setStagedImages(prev => {
+                                      const newStaged = { ...prev };
+                                      delete newStaged.achievements[achievement.id];
+                                      return newStaged;
+                                    });
+                                  }}
+                                  isStaged={stagedImages.achievements[achievement.id]?.file}
+                                />
+                              )}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (!file) return;
+                                  
+                                  // Stage the image
+                                  const preview = URL.createObjectURL(file);
+                                  setStagedImages(prev => ({
+                                    ...prev,
+                                    achievements: {
+                                      ...prev.achievements,
+                                      [achievement.id]: {
+                                        file,
+                                        preview,
+                                        oldUrl: achievement.image
+                                      }
+                                    }
+                                  }));
+                                  
+                                  // Update data with preview
+                                  const newList = [...data.achievements];
+                                  newList[index].image = preview;
+                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                  
+                                  e.target.value = '';
+                                }}
+                                className="flex-1 text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
+                              />
+                            </div>
+                            {stagedImages.achievements[achievement.id] && (
+                              <p className="text-yellow-500 text-sm flex items-center gap-2">
+                                <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                                Image staged - click Save to upload
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {(!data.achievements || data.achievements.length === 0) && (
+                        <div className="text-center py-12 text-gray-400">
+                          <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                          </svg>
+                          <p>No achievements added yet</p>
+                          <p className="text-sm mt-2">Click "Add New Achievement" to get started</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

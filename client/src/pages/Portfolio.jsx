@@ -23,7 +23,8 @@ import TiltedCard from "../components/reactbits/TiltedCard";
 import ScrollFloat from "../components/reactbits/ScrollFloat";
 import Particles from "../components/reactbits/Particles";
 import Proximity from "../components/reactbits/Proximity";
-import { SendIcon } from "lucide-react";
+import Timeline from "../components/Timeline";
+import { Building2, Calendar, SendIcon } from "lucide-react";
 
 // Contact Form Component with custom validation and rate limiting
 const ContactForm = () => {
@@ -138,10 +139,13 @@ const ContactForm = () => {
       const remainingSeconds = Math.ceil(
         (COOLDOWN_PERIOD - timeSinceLastSubmit) / 1000
       );
-      toast.error(`Please wait ${remainingSeconds} seconds before sending another message.`, {
-        duration: 3000,
-        icon: '⏱️',
-      });
+      toast.error(
+        `Please wait ${remainingSeconds} seconds before sending another message.`,
+        {
+          duration: 3000,
+          icon: "⏱️",
+        }
+      );
       return;
     }
 
@@ -151,7 +155,7 @@ const ContactForm = () => {
       await axios.post("/api/contact", formData);
       toast.success("Message sent successfully! I'll get back to you soon.", {
         duration: 4000,
-        icon: '✅',
+        icon: "✅",
       });
       setFormData({ name: "", email: "", message: "" });
       setTouched({});
@@ -165,13 +169,19 @@ const ContactForm = () => {
           duration: 4000,
         });
       } else if (err.response?.status === 500) {
-        toast.error("Server error. Please try again later or contact me directly via email.", {
-          duration: 5000,
-        });
+        toast.error(
+          "Server error. Please try again later or contact me directly via email.",
+          {
+            duration: 5000,
+          }
+        );
       } else {
-        toast.error("Failed to send message. Please check your connection and try again.", {
-          duration: 4000,
-        });
+        toast.error(
+          "Failed to send message. Please check your connection and try again.",
+          {
+            duration: 4000,
+          }
+        );
       }
     } finally {
       setLoading(false);
@@ -182,7 +192,11 @@ const ContactForm = () => {
   const cooldownSeconds = Math.ceil(cooldownRemaining / 1000);
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-5 text-left" noValidate>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto space-y-5 text-left"
+      noValidate
+    >
       {/* Name Input */}
       <div className="relative">
         <input
@@ -202,7 +216,11 @@ const ContactForm = () => {
         {errors.name && touched.name && (
           <div className="flex items-center gap-2 mt-2 text-red-400 text-sm animate-fadeIn">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             <span>{errors.name}</span>
           </div>
@@ -228,7 +246,11 @@ const ContactForm = () => {
         {errors.email && touched.email && (
           <div className="flex items-center gap-2 mt-2 text-red-400 text-sm animate-fadeIn">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             <span>{errors.email}</span>
           </div>
@@ -255,7 +277,11 @@ const ContactForm = () => {
           {errors.message && touched.message ? (
             <div className="flex items-center gap-2 text-red-400 text-sm animate-fadeIn">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span>{errors.message}</span>
             </div>
@@ -280,8 +306,18 @@ const ContactForm = () => {
           </>
         ) : isCooldownActive ? (
           <>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <span>Wait {cooldownSeconds}s</span>
           </>
@@ -297,9 +333,15 @@ const ContactForm = () => {
       {isCooldownActive && (
         <div className="flex items-center justify-center gap-2 text-yellow-400 text-sm bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-3 animate-fadeIn">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+              clipRule="evenodd"
+            />
           </svg>
-          <span>Please wait {cooldownSeconds} seconds before sending another message</span>
+          <span>
+            Please wait {cooldownSeconds} seconds before sending another message
+          </span>
         </div>
       )}
     </form>
@@ -616,7 +658,6 @@ const Portfolio = () => {
       </div>
     );
 
-
   // Get projects to display - initially show 2, then all when "Show More" is clicked
   const displayedProjects = showAllProjects
     ? data.projects
@@ -632,20 +673,20 @@ const Portfolio = () => {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#1e293b',
-            color: '#fff',
-            border: '1px solid #38bdf8',
+            background: "#1e293b",
+            color: "#fff",
+            border: "1px solid #38bdf8",
           },
           success: {
             iconTheme: {
-              primary: '#38bdf8',
-              secondary: '#fff',
+              primary: "#38bdf8",
+              secondary: "#fff",
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+              primary: "#ef4444",
+              secondary: "#fff",
             },
           },
         }}
@@ -801,33 +842,346 @@ const Portfolio = () => {
           viewport={{ once: true, amount: 0.2 }}
           variants={containerVariants}
         >
-          <div className="max-w-4xl mx-auto relative z-10">
+          <div className="max-w-6xl mx-auto relative z-10">
             <ScrollFloat>
-              <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
-                <ShinyText text="Experience" />
+              <h2 className="text-4xl md:text-5xl font-bold mb-20 text-center">
+                <ShinyText text="Professional Journey" />
               </h2>
             </ScrollFloat>
-            <motion.div className="space-y-12" variants={containerVariants}>
-              {data.experience.map((exp, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="border-l-2 border-accent pl-8 relative py-2"
-                >
-                  <div className="absolute w-4 h-4 bg-accent rounded-full -left-[9px] top-2 shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
-                  <h3 className="text-2xl font-bold text-white">{exp.role}</h3>
-                  <h4 className="text-xl text-accent mb-2">{exp.company}</h4>
-                  <p className="text-gray-500 text-sm mb-4 uppercase tracking-wider">
-                    {exp.period} | {exp.location}
-                  </p>
-                  <BlurText
-                    text={exp.description}
-                    className="text-gray-300 leading-relaxed"
-                    delay={0.01}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
+
+            <div className="relative">
+              {/* Vertical timeline line */}
+              <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent transform -translate-x-1/2">
+                <div className="absolute inset-0 bg-accent/20 blur-sm" />
+              </div>
+
+              <motion.div className="space-y-8" variants={containerVariants}>
+                {data.experience.map((exp, index) => (
+                  <motion.div
+                    key={index}
+                    variants={itemVariants}
+                    className="relative flex flex-col md:flex-row items-start"
+                  >
+                    {/* Timeline dot and connecting lines */}
+                    <div className="absolute left-4 md:left-1/2 top-6 z-20 transform -translate-x-1/2">
+                      {/* Vertical connecting line to next item */}
+                      {index < data.experience.length - 1 && (
+                        <motion.div
+                          initial={{ scaleY: 0 }}
+                          whileInView={{ scaleY: 1 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            delay: index * 0.1 + 0.4,
+                            duration: 0.6,
+                          }}
+                          className="absolute left-1/2 top-6 w-0.5 h-full bg-gradient-to-b from-accent to-accent/30 origin-top transform -translate-x-1/2"
+                        />
+                      )}
+
+                      {/* Main dot container */}
+                      <div className="relative flex items-center justify-center">
+                        {/* Main dot */}
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            delay: index * 0.1 + 0.3,
+                            type: "spring",
+                          }}
+                          className="w-4 h-4 rounded-full bg-accent border-4 border-primary shadow-lg shadow-accent/50 relative z-10"
+                        />
+
+                        {/* Pulsing ring */}
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileInView={{ scale: 1, opacity: 1 }}
+                          viewport={{ once: true }}
+                          animate={{
+                            scale: [1, 1.8, 1],
+                            opacity: [0.7, 0, 0.7],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "loop",
+                            ease: "easeInOut",
+                            delay: index * 0.3,
+                          }}
+                          className="absolute inset-0 w-4 h-4 rounded-full bg-accent/50 border-2 border-accent"
+                        />
+                      </div>
+
+                      {/* Horizontal connecting lines for desktop */}
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 + 0.5, duration: 0.4 }}
+                        className={`hidden md:block absolute top-2 w-20 h-0.5 bg-gradient-to-r ${
+                          index % 2 === 0
+                            ? "from-accent/30 to-accent -left-20"
+                            : "from-accent to-accent/30 -right-20"
+                        }`}
+                      />
+                    </div>
+
+                    {/* Left side content (even indexes) */}
+                    {index % 2 === 0 ? (
+                      <>
+                        {/* Date card - left side */}
+                        <div className="hidden md:flex flex-1 justify-end pr-12 mt-2">
+                          <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 + 0.2 }}
+                            className="bg-accent/10 border border-accent/20 rounded-xl p-4 backdrop-blur-sm max-w-xs w-full"
+                          >
+                            <p className="text-accent font-semibold text-lg">
+                              {exp.period}
+                            </p>
+                            <p className="text-gray-400 text-sm mt-1">
+                              {exp.location}
+                            </p>
+                          </motion.div>
+                        </div>
+
+                        {/* Spacer for left side */}
+                        <div className="hidden md:block w-8" />
+
+                        {/* Experience card - right side */}
+                        <div className="flex-1 md:max-w-lg ml-12 md:ml-0">
+                          <motion.div
+                            whileHover={{
+                              scale: 1.02,
+                              y: -2,
+                              transition: { type: "spring", stiffness: 300 },
+                            }}
+                            className="relative bg-gradient-to-br from-secondary/80 to-primary/30 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 hover:border-accent/50 transition-all duration-500 group hover:shadow-2xl hover:shadow-accent/10 overflow-hidden"
+                          >
+                            {/* Card content */}
+                            <div className="relative z-10">
+                              {/* Header */}
+                              <div className="mb-4">
+                                <motion.h3
+                                  className="text-2xl font-bold text-white group-hover:text-accent transition-colors duration-300 mb-2"
+                                  whileHover={{ x: 2 }}
+                                >
+                                  {exp.role}
+                                </motion.h3>
+
+                                <div className="flex items-center gap-2 text-accent text-lg font-semibold mb-3">
+                                  <div className="p-2 bg-accent/20 rounded-lg">
+                                    <Building2
+                                      className="text-accent"
+                                      size={20}
+                                    />
+                                  </div>
+                                  <span>{exp.company}</span>
+                                </div>
+
+                                {/* Mobile date */}
+                                <div className="md:hidden flex items-center gap-2 text-gray-400 text-sm mb-3 bg-accent/10 border border-accent/20 rounded-lg p-3">
+                                  <Calendar size={16} className="text-accent" />
+                                  <span className="text-accent font-medium">
+                                    {exp.period}
+                                  </span>
+                                  <span className="text-accent">•</span>
+                                  <span className="text-gray-300">
+                                    {exp.location}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Description */}
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 + 0.4 }}
+                                className="text-gray-300 leading-relaxed space-y-3"
+                              >
+                                {exp.description.split(". ").map(
+                                  (sentence, i) =>
+                                    sentence.trim() && (
+                                      <p
+                                        key={i}
+                                        className="flex items-start gap-3"
+                                      >
+                                        <span className="text-accent mt-2 flex-shrink-0">
+                                          ▹
+                                        </span>
+                                        <span>
+                                          {sentence.trim()}
+                                          {sentence.trim().endsWith(".")
+                                            ? ""
+                                            : "."}
+                                        </span>
+                                      </p>
+                                    )
+                                )}
+                              </motion.div>
+
+                              {/* Technologies used */}
+                              {exp.technologies && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  whileInView={{ opacity: 1, y: 0 }}
+                                  viewport={{ once: true }}
+                                  transition={{ delay: index * 0.1 + 0.6 }}
+                                  className="mt-6 pt-4 border-t border-gray-700/50"
+                                >
+                                  <p className="text-sm text-gray-400 mb-2 font-medium">
+                                    Technologies used:
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {exp.technologies.map((tech, techIndex) => (
+                                      <motion.span
+                                        key={techIndex}
+                                        whileHover={{ scale: 1.05 }}
+                                        className="px-3 py-1 bg-accent/10 text-accent border border-accent/20 rounded-full text-sm font-medium"
+                                      >
+                                        {tech}
+                                      </motion.span>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </motion.div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Experience card - left side */}
+                        <div className="flex-1 md:max-w-lg ml-12 md:ml-0">
+                          <motion.div
+                            whileHover={{
+                              scale: 1.02,
+                              y: -2,
+                              transition: { type: "spring", stiffness: 300 },
+                            }}
+                            className="relative bg-gradient-to-br from-secondary/80 to-primary/30 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 hover:border-accent/50 transition-all duration-500 group hover:shadow-2xl hover:shadow-accent/10 overflow-hidden"
+                          >
+                            {/* Card content */}
+                            <div className="relative z-10">
+                              {/* Header */}
+                              <div className="mb-4">
+                                <motion.h3
+                                  className="text-2xl font-bold text-white group-hover:text-accent transition-colors duration-300 mb-2"
+                                  whileHover={{ x: 2 }}
+                                >
+                                  {exp.role}
+                                </motion.h3>
+
+                                <div className="flex items-center gap-2 text-accent text-lg font-semibold mb-3">
+                                  <div className="p-2 bg-accent/20 rounded-lg">
+                                    <Building2
+                                      className="text-accent"
+                                      size={20}
+                                    />
+                                  </div>
+                                  <span>{exp.company}</span>
+                                </div>
+
+                                {/* Mobile date */}
+                                <div className="md:hidden flex items-center gap-2 text-gray-400 text-sm mb-3 bg-accent/10 border border-accent/20 rounded-lg p-3">
+                                  <Calendar size={16} className="text-accent" />
+                                  <span className="text-accent font-medium">
+                                    {exp.period}
+                                  </span>
+                                  <span className="text-accent">•</span>
+                                  <span className="text-gray-300">
+                                    {exp.location}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Description */}
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 + 0.4 }}
+                                className="text-gray-300 leading-relaxed space-y-3"
+                              >
+                                {exp.description.split(". ").map(
+                                  (sentence, i) =>
+                                    sentence.trim() && (
+                                      <p
+                                        key={i}
+                                        className="flex items-start gap-3"
+                                      >
+                                        <span className="text-accent mt-2 flex-shrink-0">
+                                          ▹
+                                        </span>
+                                        <span>
+                                          {sentence.trim()}
+                                          {sentence.trim().endsWith(".")
+                                            ? ""
+                                            : "."}
+                                        </span>
+                                      </p>
+                                    )
+                                )}
+                              </motion.div>
+
+                              {/* Technologies used */}
+                              {exp.technologies && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  whileInView={{ opacity: 1, y: 0 }}
+                                  viewport={{ once: true }}
+                                  transition={{ delay: index * 0.1 + 0.6 }}
+                                  className="mt-6 pt-4 border-t border-gray-700/50"
+                                >
+                                  <p className="text-sm text-gray-400 mb-2 font-medium">
+                                    Technologies used:
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {exp.technologies.map((tech, techIndex) => (
+                                      <motion.span
+                                        key={techIndex}
+                                        whileHover={{ scale: 1.05 }}
+                                        className="px-3 py-1 bg-accent/10 text-accent border border-accent/20 rounded-full text-sm font-medium"
+                                      >
+                                        {tech}
+                                      </motion.span>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </motion.div>
+                        </div>
+
+                        {/* Spacer for right side */}
+                        <div className="hidden md:block w-8" />
+
+                        {/* Date card - right side */}
+                        <div className="hidden md:flex flex-1 justify-start pl-12 mt-2">
+                          <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 + 0.2 }}
+                            className="bg-accent/10 border border-accent/20 rounded-xl p-4 backdrop-blur-sm max-w-xs w-full"
+                          >
+                            <p className="text-accent font-semibold text-lg">
+                              {exp.period}
+                            </p>
+                            <p className="text-gray-400 text-sm mt-1">
+                              {exp.location}
+                            </p>
+                          </motion.div>
+                        </div>
+                      </>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
           </div>
         </motion.section>
 
@@ -924,6 +1278,35 @@ const Portfolio = () => {
           </div>
         </motion.section>
 
+        {/* Achievements Section */}
+        {data.achievements && data.achievements.length > 0 && (
+          <motion.section
+            className="py-20 px-6 relative z-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={containerVariants}
+          >
+            <motion.h2
+              className="text-4xl font-bold text-center mb-4"
+              variants={itemVariants}
+            >
+              <ScrollFloat>
+                <h2 className="text-4xl md:text-5xl font-bold mb-20 text-center">
+                  <ShinyText text="Certifications & Awards" />
+                </h2>
+              </ScrollFloat>
+            </motion.h2>
+            <motion.p
+              className="text-gray-400 text-center mb-12 max-w-2xl mx-auto"
+              variants={itemVariants}
+            >
+              Professional achievements and recognitions
+            </motion.p>
+
+            <Timeline achievements={data.achievements} />
+          </motion.section>
+        )}
 
         {/* Contact Section */}
         <motion.section

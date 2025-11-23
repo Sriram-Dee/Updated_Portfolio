@@ -1,8 +1,8 @@
 {
   "profile": {
     "name": "Sriram R",
-    "avatar": "/uploads/1763852896291-IMG_20251121_224245.jpg",
-    "title": "Junior Software Engineer",
+    "avatar": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763908753/portfolio/trdp0zshddypkobxyriv.jpg",
+    "title": "Junior Fullstack Developer",
     "email": "sriram14jeeva12@gmail.com",
     "phone": "+91 8667286277",
     "location": "Cuddalore, India",
@@ -60,7 +60,8 @@
       "technologies": "React.js, Node.js, MongoDB",
       "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
       "period": "March 2025 – Present",
-      "images": []
+      "images": [],
+      "demoUrl": "https://tmsdemo.digifox.studio"
     },
     {
       "name": "Tune For 2",
@@ -108,12 +109,12 @@
   },
   "achievements": [
     {
-      "id": "award-1",
+      "id": "achievement-1763912338323",
       "type": "award",
-      "name": "Rising Star Award (2025)",
+      "name": "Rising Star Award",
       "issuer": "Hema's Enterprise Pvt Ltd",
-      "date": "2025-01-01",
-      "description": "Recognition for outstanding performance and contribution to the company",
+      "date": "2025-03-16",
+      "description": "Recognition for outstanding performance",
       "image": null
     }
   ]

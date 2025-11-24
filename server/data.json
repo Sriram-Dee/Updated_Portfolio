@@ -40,7 +40,12 @@
       "SSH",
       "HTTPS Setup"
     ],
-    "Tools": ["Termius", "PuTTY", "Git/GitHub", "VS Code"]
+    "Tools": [
+      "Termius",
+      "PuTTY",
+      "Git/GitHub",
+      "VS Code"
+    ]
   },
   "professional_skills": [
     "Full-Stack Application Development",
@@ -67,7 +72,9 @@
       "technologies": "React.js, Spring Boot, MongoDB",
       "description": "Built a custom song ordering platform with React front-end and Java Spring Boot backend.",
       "period": "April 2024 – September 2024",
-      "images": []
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763998168/portfolio/hjq1qug0gkt6n2rhxfdp.jpg"
+      ]
     }
   ],
   "experience": [
@@ -95,8 +102,13 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
-  "languages": ["Tamil", "English"],
+  "awards": [
+    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
+  ],
+  "languages": [
+    "Tamil",
+    "English"
+  ],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/"

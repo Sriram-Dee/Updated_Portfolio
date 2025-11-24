@@ -40,12 +40,7 @@
       "SSH",
       "HTTPS Setup"
     ],
-    "Tools": [
-      "Termius",
-      "PuTTY",
-      "Git/GitHub",
-      "VS Code"
-    ]
+    "Tools": ["Termius", "PuTTY", "Git/GitHub", "VS Code"]
   },
   "professional_skills": [
     "Full-Stack Application Development",
@@ -61,7 +56,9 @@
       "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
       "period": "March 2025 – Present",
       "images": [
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763992371/portfolio/adxbccxsncgtqxnvy3bn.jpg"
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952612/portfolio/frg2h9recb9vfbz4zcbh.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952621/portfolio/lgcf1hbmkftvymrmnd3v.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952633/portfolio/rnsnanvy1yphqsb4ywuf.png"
       ],
       "demoUrl": "https://tmsdemo.digifox.studio"
     },
@@ -98,13 +95,8 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": [
-    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
-  ],
-  "languages": [
-    "Tamil",
-    "English"
-  ],
+  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
+  "languages": ["Tamil", "English"],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/"

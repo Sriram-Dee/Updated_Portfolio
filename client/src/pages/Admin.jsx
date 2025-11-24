@@ -11,10 +11,16 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [saving, setSaving] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, onConfirm: null, title: "", message: "" });
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    onConfirm: null,
+    title: "",
+    message: "",
+  });
   const [stagedImages, setStagedImages] = useState({
-    profile: null,      // { file: File, preview: string, oldUrl: string }
-    achievements: {},   // { achievementId: { file, preview } }
+    profile: null, // { file: File, preview: string, oldUrl: string }
+    achievements: {}, // { achievementId: { file, preview } }
+    projects: {}, // { imageId: { file, preview, projectIndex } }
   });
   const navigate = useNavigate();
 
@@ -73,71 +79,100 @@ const Admin = () => {
     try {
       // Upload all staged images first
       const uploadPromises = [];
-      
+
       // Upload profile image if staged
       if (stagedImages.profile) {
         uploadPromises.push(
-          handleFileUpload(stagedImages.profile.file)
-            .then(async (url) => {
-              // Delete old image from Cloudinary
-              if (stagedImages.profile.oldUrl && stagedImages.profile.oldUrl.startsWith('http')) {
-                await deleteCloudinaryImage(stagedImages.profile.oldUrl);
-              }
-              return { type: 'profile', url };
-            })
+          handleFileUpload(stagedImages.profile.file).then(async (url) => {
+            // Delete old image from Cloudinary
+            if (
+              stagedImages.profile.oldUrl &&
+              stagedImages.profile.oldUrl.startsWith("http")
+            ) {
+              await deleteCloudinaryImage(stagedImages.profile.oldUrl);
+            }
+            return { type: "profile", url };
+          })
         );
       }
-      
+
       // Upload achievement images if staged
       Object.entries(stagedImages.achievements).forEach(([id, imageData]) => {
         if (imageData.file) {
           uploadPromises.push(
-            handleFileUpload(imageData.file)
-              .then(async (url) => {
-                if (imageData.oldUrl && imageData.oldUrl.startsWith('http')) {
-                  await deleteCloudinaryImage(imageData.oldUrl);
-                }
-                return { type: 'achievement', id, url };
-              })
+            handleFileUpload(imageData.file).then(async (url) => {
+              if (imageData.oldUrl && imageData.oldUrl.startsWith("http")) {
+                await deleteCloudinaryImage(imageData.oldUrl);
+              }
+              return { type: "achievement", id, url };
+            })
           );
         }
       });
-      
+
+      // Upload project images if staged
+      Object.entries(stagedImages.projects).forEach(([imageId, imageData]) => {
+        if (imageData.file) {
+          uploadPromises.push(
+            handleFileUpload(imageData.file).then((url) => {
+              return {
+                type: "project",
+                projectIndex: imageData.projectIndex,
+                preview: imageData.preview,
+                url,
+              };
+            })
+          );
+        }
+      });
+
       // Wait for all uploads
       const uploadResults = await Promise.all(uploadPromises);
-      
+
       // Update data with new URLs
       const updatedData = { ...data };
-      uploadResults.forEach(({ type, url, id }) => {
-        if (type === 'profile') {
+      uploadResults.forEach(({ type, url, id, projectIndex, preview }) => {
+        if (type === "profile") {
           updatedData.profile.avatar = url;
-        } else if (type === 'achievement') {
-          const achievement = updatedData.achievements.find(a => a.id === id);
+        } else if (type === "achievement") {
+          const achievement = updatedData.achievements.find((a) => a.id === id);
           if (achievement) {
             achievement.image = url;
           }
+        } else if (type === "project") {
+          // Replace blob preview URL with real Cloudinary URL
+          const project = updatedData.projects[projectIndex];
+          if (project && project.images) {
+            const blobIndex = project.images.findIndex(
+              (img) => img === preview
+            );
+            if (blobIndex !== -1) {
+              project.images[blobIndex] = url;
+            }
+          }
         }
       });
-      
+
       // Save to GitHub
       await axios.post("/api/portfolio", updatedData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      
+
       // Update local state
       setData(updatedData);
-      
+
       // Clear staged images
       setStagedImages({
         profile: null,
         achievements: {},
+        projects: {},
       });
-      
+
       toast.success("Saved successfully!", {
         duration: 3000,
-        icon: '✅',
+        icon: "✅",
       });
     } catch (err) {
       console.error("Save failed:", err);
@@ -184,13 +219,13 @@ const Admin = () => {
   // Stage image for upload (preview only)
   const stageProfileImage = (file) => {
     const preview = URL.createObjectURL(file);
-    setStagedImages(prev => ({
+    setStagedImages((prev) => ({
       ...prev,
       profile: {
         file,
         preview,
-        oldUrl: data.profile.avatar
-      }
+        oldUrl: data.profile.avatar,
+      },
     }));
     // Update data with preview URL for immediate display
     handleChange("profile", "avatar", preview);
@@ -200,9 +235,9 @@ const Admin = () => {
   const removeStagedProfileImage = () => {
     if (stagedImages.profile) {
       URL.revokeObjectURL(stagedImages.profile.preview);
-      setStagedImages(prev => ({
+      setStagedImages((prev) => ({
         ...prev,
-        profile: null
+        profile: null,
       }));
       // Restore old URL
       handleChange("profile", "avatar", stagedImages.profile.oldUrl);
@@ -224,20 +259,20 @@ const Admin = () => {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#1e293b',
-            color: '#fff',
-            border: '1px solid #38bdf8',
+            background: "#1e293b",
+            color: "#fff",
+            border: "1px solid #38bdf8",
           },
           success: {
             iconTheme: {
-              primary: '#38bdf8',
-              secondary: '#fff',
+              primary: "#38bdf8",
+              secondary: "#fff",
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+              primary: "#ef4444",
+              secondary: "#fff",
             },
           },
         }}
@@ -250,7 +285,7 @@ const Admin = () => {
         message={confirmDialog.message}
       />
       {/* Mobile Header */}
-      <div className="lg:hidden bg-secondary p-4 border-b border-gray-700">
+      <div className="lg:hidden sticky top-0 z-50 bg-secondary p-4 border-b border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -415,16 +450,22 @@ const Admin = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Skills:</span>
                     <span className="font-bold">
-                      {data?.skills ? Object.values(data.skills).flat().length : 0}
+                      {data?.skills
+                        ? Object.values(data.skills).flat().length
+                        : 0}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Experience:</span>
-                    <span className="font-bold">{data?.experience?.length || 0}</span>
+                    <span className="font-bold">
+                      {data?.experience?.length || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Projects:</span>
-                    <span className="font-bold">{data?.projects?.length || 0}</span>
+                    <span className="font-bold">
+                      {data?.projects?.length || 0}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -500,7 +541,7 @@ const Admin = () => {
                               const file = e.target.files[0];
                               if (!file) return;
                               stageProfileImage(file);
-                              e.target.value = ''; // Reset input
+                              e.target.value = ""; // Reset input
                             }}
                             className="w-full text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
                           />
@@ -909,6 +950,9 @@ const Admin = () => {
                             <div className="md:col-span-2 space-y-2">
                               <label className="block text-sm font-medium text-gray-400">
                                 Project Images
+                                <span className="text-xs text-gray-500 ml-2">
+                                  (Use arrows to reorder)
+                                </span>
                               </label>
                               <div className="flex flex-wrap gap-3 mb-4">
                                 {project.images &&
@@ -922,6 +966,79 @@ const Admin = () => {
                                         alt={`Project ${index + 1}`}
                                         className="w-20 h-20 lg:w-32 lg:h-32 object-cover rounded border-2 border-gray-600 hover:border-accent transition-colors"
                                       />
+
+                                      {/* Order badge */}
+                                      <div className="absolute top-1 left-1 bg-primary/90 text-accent text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border border-accent/50">
+                                        {imgIndex + 1}
+                                      </div>
+
+                                      {/* Move left button */}
+                                      {imgIndex > 0 && (
+                                        <button
+                                          onClick={() => {
+                                            const newList = [...data.projects];
+                                            const images = [
+                                              ...newList[index].images,
+                                            ];
+                                            // Swap with previous
+                                            [
+                                              images[imgIndex - 1],
+                                              images[imgIndex],
+                                            ] = [
+                                              images[imgIndex],
+                                              images[imgIndex - 1],
+                                            ];
+                                            newList[index].images = images;
+                                            setData((prev) => ({
+                                              ...prev,
+                                              projects: newList,
+                                            }));
+                                            toast.success("Image moved left", {
+                                              icon: "⬅️",
+                                              duration: 1500,
+                                            });
+                                          }}
+                                          className="absolute top-1/2 -translate-y-1/2 -left-1 lg:-left-2 bg-blue-500 text-white rounded-full w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center text-sm opacity-100 lg:opacity-0 lg:group-hover/image:opacity-100 transition-opacity hover:bg-blue-600 shadow-lg"
+                                          title="Move left"
+                                        >
+                                          ←
+                                        </button>
+                                      )}
+
+                                      {/* Move right button */}
+                                      {imgIndex < project.images.length - 1 && (
+                                        <button
+                                          onClick={() => {
+                                            const newList = [...data.projects];
+                                            const images = [
+                                              ...newList[index].images,
+                                            ];
+                                            // Swap with next
+                                            [
+                                              images[imgIndex],
+                                              images[imgIndex + 1],
+                                            ] = [
+                                              images[imgIndex + 1],
+                                              images[imgIndex],
+                                            ];
+                                            newList[index].images = images;
+                                            setData((prev) => ({
+                                              ...prev,
+                                              projects: newList,
+                                            }));
+                                            toast.success("Image moved right", {
+                                              icon: "➡️",
+                                              duration: 1500,
+                                            });
+                                          }}
+                                          className="absolute top-1/2 -translate-y-1/2 -right-1 lg:-right-2 bg-blue-500 text-white rounded-full w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center text-sm opacity-100 lg:opacity-0 lg:group-hover/image:opacity-100 transition-opacity hover:bg-blue-600 shadow-lg"
+                                          title="Move right"
+                                        >
+                                          →
+                                        </button>
+                                      )}
+
+                                      {/* Delete button */}
                                       <button
                                         onClick={() => {
                                           const newList = [...data.projects];
@@ -934,8 +1051,13 @@ const Admin = () => {
                                             ...prev,
                                             projects: newList,
                                           }));
+                                          toast.success("Image removed", {
+                                            icon: "🗑️",
+                                            duration: 1500,
+                                          });
                                         }}
                                         className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-red-500 text-white rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center text-xs opacity-0 group-hover/image:opacity-100 transition-opacity hover:bg-red-600"
+                                        title="Delete image"
                                       >
                                         &times;
                                       </button>
@@ -947,46 +1069,57 @@ const Admin = () => {
                                 type="file"
                                 multiple
                                 accept="image/*"
-                                onChange={async (e) => {
+                                onChange={(e) => {
                                   const files = Array.from(e.target.files);
                                   if (files.length === 0) return;
 
-                                  const uploadedUrls = [];
-                                  for (const file of files) {
-                                    await new Promise((resolve) => {
-                                      handleFileUpload(
-                                        file,
-                                        (url) => {
-                                          uploadedUrls.push(url);
-                                          resolve();
-                                        },
-                                        (error) => {
-                                          console.error("Upload error:", error);
-                                          resolve();
-                                        }
-                                      );
-                                    });
-                                  }
+                                  // Stage the images for upload
+                                  const newImages = [];
+                                  files.forEach((file) => {
+                                    const preview = URL.createObjectURL(file);
+                                    const imageId = `project-${index}-img-${Date.now()}-${Math.random()}`;
 
-                                  if (uploadedUrls.length > 0) {
-                                    const newList = [...data.projects];
-                                    newList[index].images = [
-                                      ...(newList[index].images || []),
-                                      ...uploadedUrls,
-                                    ];
-                                    setData((prev) => ({
+                                    // Add to staged images
+                                    setStagedImages((prev) => ({
                                       ...prev,
-                                      projects: newList,
+                                      projects: {
+                                        ...prev.projects,
+                                        [imageId]: {
+                                          file,
+                                          preview,
+                                          projectIndex: index,
+                                        },
+                                      },
                                     }));
-                                    alert(
-                                      `Successfully uploaded ${uploadedUrls.length} image(s)`
-                                    );
-                                  }
+
+                                    newImages.push(preview);
+                                  });
+
+                                  // Update data with preview URLs
+                                  const newList = [...data.projects];
+                                  newList[index].images = [
+                                    ...(newList[index].images || []),
+                                    ...newImages,
+                                  ];
+                                  setData((prev) => ({
+                                    ...prev,
+                                    projects: newList,
+                                  }));
+
+                                  toast.success(
+                                    `${files.length} image(s) staged - click Save to upload`,
+                                    {
+                                      icon: "📸",
+                                    }
+                                  );
+
+                                  e.target.value = ""; // Reset input
                                 }}
                                 className="w-full text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
                               />
                               <p className="text-xs text-gray-500">
-                                You can select multiple images
+                                You can select multiple images - they will be
+                                uploaded when you click Save
                               </p>
                             </div>
                           </div>
@@ -1007,16 +1140,19 @@ const Admin = () => {
                         onClick={() => {
                           const newAchievement = {
                             id: `achievement-${Date.now()}`,
-                            type: 'certification',
-                            name: '',
-                            issuer: '',
-                            date: new Date().toISOString().split('T')[0],
-                            description: '',
-                            image: null
+                            type: "certification",
+                            name: "",
+                            issuer: "",
+                            date: new Date().toISOString().split("T")[0],
+                            description: "",
+                            image: null,
                           };
                           setData((prev) => ({
                             ...prev,
-                            achievements: [...(prev.achievements || []), newAchievement],
+                            achievements: [
+                              ...(prev.achievements || []),
+                              newAchievement,
+                            ],
                           }));
                         }}
                         className="px-4 py-2 lg:px-6 lg:py-3 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 whitespace-nowrap"
@@ -1039,19 +1175,39 @@ const Admin = () => {
                                 message: `Are you sure you want to delete "${achievement.name}"? This action cannot be undone.`,
                                 onConfirm: async () => {
                                   // Delete image from Cloudinary if exists
-                                  if (achievement.image && achievement.image.startsWith('http')) {
-                                    await deleteCloudinaryImage(achievement.image);
+                                  if (
+                                    achievement.image &&
+                                    achievement.image.startsWith("http")
+                                  ) {
+                                    await deleteCloudinaryImage(
+                                      achievement.image
+                                    );
                                   }
-                                  const newList = data.achievements.filter((_, i) => i !== index);
-                                  setData((prev) => ({ ...prev, achievements: newList }));
-                                }
+                                  const newList = data.achievements.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setData((prev) => ({
+                                    ...prev,
+                                    achievements: newList,
+                                  }));
+                                },
                               });
                             }}
                             className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Delete achievement"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
                             </svg>
                           </button>
 
@@ -1065,11 +1221,16 @@ const Admin = () => {
                                 onChange={(e) => {
                                   const newList = [...data.achievements];
                                   newList[index].type = e.target.value;
-                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                  setData((prev) => ({
+                                    ...prev,
+                                    achievements: newList,
+                                  }));
                                 }}
                                 className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
                               >
-                                <option value="certification">Certification</option>
+                                <option value="certification">
+                                  Certification
+                                </option>
                                 <option value="award">Award</option>
                               </select>
                             </div>
@@ -1084,7 +1245,10 @@ const Admin = () => {
                                 onChange={(e) => {
                                   const newList = [...data.achievements];
                                   newList[index].date = e.target.value;
-                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                  setData((prev) => ({
+                                    ...prev,
+                                    achievements: newList,
+                                  }));
                                 }}
                                 className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
                               />
@@ -1092,7 +1256,10 @@ const Admin = () => {
 
                             <div className="space-y-2">
                               <label className="block text-sm font-medium text-gray-400">
-                                {achievement.type === 'certification' ? 'Certification' : 'Award'} Name
+                                {achievement.type === "certification"
+                                  ? "Certification"
+                                  : "Award"}{" "}
+                                Name
                               </label>
                               <input
                                 type="text"
@@ -1100,7 +1267,10 @@ const Admin = () => {
                                 onChange={(e) => {
                                   const newList = [...data.achievements];
                                   newList[index].name = e.target.value;
-                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                  setData((prev) => ({
+                                    ...prev,
+                                    achievements: newList,
+                                  }));
                                 }}
                                 className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
                                 placeholder="e.g., AWS Certified Solutions Architect"
@@ -1117,7 +1287,10 @@ const Admin = () => {
                                 onChange={(e) => {
                                   const newList = [...data.achievements];
                                   newList[index].issuer = e.target.value;
-                                  setData((prev) => ({ ...prev, achievements: newList }));
+                                  setData((prev) => ({
+                                    ...prev,
+                                    achievements: newList,
+                                  }));
                                 }}
                                 className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
                                 placeholder="e.g., Amazon Web Services"
@@ -1130,11 +1303,14 @@ const Admin = () => {
                               Description (Optional)
                             </label>
                             <textarea
-                              value={achievement.description || ''}
+                              value={achievement.description || ""}
                               onChange={(e) => {
                                 const newList = [...data.achievements];
                                 newList[index].description = e.target.value;
-                                setData((prev) => ({ ...prev, achievements: newList }));
+                                setData((prev) => ({
+                                  ...prev,
+                                  achievements: newList,
+                                }));
                               }}
                               className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-24 resize-none transition-colors"
                               placeholder="Brief description of the achievement..."
@@ -1152,15 +1328,23 @@ const Admin = () => {
                                   onRemove={() => {
                                     const newList = [...data.achievements];
                                     newList[index].image = null;
-                                    setData((prev) => ({ ...prev, achievements: newList }));
+                                    setData((prev) => ({
+                                      ...prev,
+                                      achievements: newList,
+                                    }));
                                     // Remove from staged images
-                                    setStagedImages(prev => {
+                                    setStagedImages((prev) => {
                                       const newStaged = { ...prev };
-                                      delete newStaged.achievements[achievement.id];
+                                      delete newStaged.achievements[
+                                        achievement.id
+                                      ];
                                       return newStaged;
                                     });
                                   }}
-                                  isStaged={stagedImages.achievements[achievement.id]?.file}
+                                  isStaged={
+                                    stagedImages.achievements[achievement.id]
+                                      ?.file
+                                  }
                                 />
                               )}
                               <input
@@ -1169,27 +1353,30 @@ const Admin = () => {
                                 onChange={(e) => {
                                   const file = e.target.files[0];
                                   if (!file) return;
-                                  
+
                                   // Stage the image
                                   const preview = URL.createObjectURL(file);
-                                  setStagedImages(prev => ({
+                                  setStagedImages((prev) => ({
                                     ...prev,
                                     achievements: {
                                       ...prev.achievements,
                                       [achievement.id]: {
                                         file,
                                         preview,
-                                        oldUrl: achievement.image
-                                      }
-                                    }
+                                        oldUrl: achievement.image,
+                                      },
+                                    },
                                   }));
-                                  
+
                                   // Update data with preview
                                   const newList = [...data.achievements];
                                   newList[index].image = preview;
-                                  setData((prev) => ({ ...prev, achievements: newList }));
-                                  
-                                  e.target.value = '';
+                                  setData((prev) => ({
+                                    ...prev,
+                                    achievements: newList,
+                                  }));
+
+                                  e.target.value = "";
                                 }}
                                 className="flex-1 text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
                               />
@@ -1204,13 +1391,26 @@ const Admin = () => {
                         </div>
                       ))}
 
-                      {(!data.achievements || data.achievements.length === 0) && (
+                      {(!data.achievements ||
+                        data.achievements.length === 0) && (
                         <div className="text-center py-12 text-gray-400">
-                          <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                          <svg
+                            className="w-16 h-16 mx-auto mb-4 opacity-50"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                            />
                           </svg>
                           <p>No achievements added yet</p>
-                          <p className="text-sm mt-2">Click "Add New Achievement" to get started</p>
+                          <p className="text-sm mt-2">
+                            Click "Add New Achievement" to get started
+                          </p>
                         </div>
                       )}
                     </div>

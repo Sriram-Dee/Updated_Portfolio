@@ -60,7 +60,9 @@
       "technologies": "React.js, Node.js, MongoDB",
       "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
       "period": "March 2025 – Present",
-      "images": [],
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763992371/portfolio/adxbccxsncgtqxnvy3bn.jpg"
+      ],
       "demoUrl": "https://tmsdemo.digifox.studio"
     },
     {

@@ -1203,7 +1203,7 @@ const Portfolio = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 + 0.2 }}
-                            className="bg-accent/10 border border-accent/20 rounded-xl p-4 backdrop-blur-sm max-w-xs w-full"
+                            className="text-end bg-accent/10 border border-accent/20 rounded-xl p-4 backdrop-blur-sm max-w-xs w-full"
                           >
                             <p className="text-accent font-semibold text-lg">
                               {exp.period}

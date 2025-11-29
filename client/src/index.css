@@ -1,32 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Lemon&family=Racing+Sans+One&display=swap");
 @import "tailwindcss";
 
 @theme {
   --color-primary: #0f172a;
   --color-secondary: #1e293b;
   --color-accent: #38bdf8;
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: "Lemon", cursive;
+  --font-hero: "Racing Sans One", cursive;
 
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-shine: shine 5s linear infinite;
   --animate-fadeIn: fadeIn 0.3s ease-in;
 
   @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
   @keyframes shine {
-    0% { background-position: 100%; }
-    100% { background-position: -100%; }
+    0% {
+      background-position: 100%;
+    }
+    100% {
+      background-position: -100%;
+    }
   }
   @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-/* Custom utilities if needed, but v4 handles most things automatically */
+/* Base typography */
 body {
   background-color: var(--color-primary);
   color: white;
   font-family: var(--font-sans);
+}
+
+/* Apply Lemon to all headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+}
+
+/* Fix profile image flash - fade in smoothly without affecting shape */
+img[alt="Profile"] {
+  opacity: 0;
+  animation: profileFadeIn 0.8s ease-out 0.3s forwards;
+}
+
+@keyframes profileFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* 3D perspective utility for loader */
+.perspective-1000 {
+  perspective: 1000px;
 }

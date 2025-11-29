@@ -100,7 +100,7 @@ const Timeline = ({ achievements = [] }) => {
                 {/* Header - Period in top right on desktop, separate row on mobile */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                   {/* Left side: Icon, Title, and Issuer */}
-                  <div className="flex items-start gap-3 flex-1">
+                  <div className="flex items-start gap-3 flex-1 flex-wrap">
                     {/* Icon */}
                     <motion.div
                       whileHover={{ scale: 1.05 }}
@@ -131,12 +131,20 @@ const Timeline = ({ achievements = [] }) => {
                       </motion.h3>
 
                       {/* Issuer */}
-                      <div className="flex items-center gap-2 text-gray-300 text-sm">
+                      <div className="hidden sm:flex items-center gap-2 text-gray-300 text-sm">
                         <Building className="w-3 h-3 sm:w-4 sm:h-4 text-accent/80 flex-shrink-0" />
                         <span className="font-medium text-gray-300">
                           {achievement.issuer}
                         </span>
                       </div>
+                    </div>
+
+                    {/* Issuer mobile */}
+                    <div className="flex sm:hidden items-center gap-2 text-gray-300 text-sm">
+                      <Building className="w-3 h-3 sm:w-4 sm:h-4 text-accent/80 flex-shrink-0" />
+                      <span className="font-medium text-gray-300">
+                        {achievement.issuer}
+                      </span>
                     </div>
                   </div>
 
@@ -176,12 +184,12 @@ const Timeline = ({ achievements = [] }) => {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 + 0.6 }}
                     whileHover={{ scale: 1.03 }}
-                    className="overflow-hidden rounded-lg sm:rounded-xl border border-gray-600/50 group/image relative mb-4 sm:mb-6"
+                    className="w-max h-max overflow-hidden rounded-lg sm:rounded-xl border border-gray-600/50 group/image relative mb-4 sm:mb-6"
                   >
                     <img
                       src={achievement.image}
                       alt={achievement.name}
-                      className="w-full h-40 sm:h-48 md:h-56 object-cover transition-transform duration-500"
+                      className="w-full max-w-[200px] aspect-[1/1] object-contain bg-white object-center transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
                   </motion.div>

@@ -10,7 +10,7 @@ import * as IoIcons from "react-icons/io5";
 import * as DiIcons from "react-icons/di";
 import * as GrIcons from "react-icons/gr";
 import * as BiIcons from "react-icons/bi";
-import FluidImage from "../components/FluidImage";
+import BlobImage from "../components/BlobImage";
 import ProjectModal from "../components/ProjectModal";
 import SplitText from "../components/reactbits/SplitText";
 import Magnet from "../components/reactbits/Magnet";
@@ -24,7 +24,9 @@ import ScrollFloat from "../components/reactbits/ScrollFloat";
 import Particles from "../components/reactbits/Particles";
 import Proximity from "../components/reactbits/Proximity";
 import Timeline from "../components/Timeline";
+import Loader3D from "../components/Loader3D";
 import { Building2, Calendar, SendIcon } from "lucide-react";
+import EducationTimeline from "../components/EducationTimeline";
 
 // Contact Form Component with custom validation and rate limiting
 const ContactForm = () => {
@@ -645,12 +647,7 @@ const Portfolio = () => {
     },
   };
 
-  if (loading)
-    return (
-      <div className="h-screen flex items-center justify-center bg-primary text-white">
-        Loading...
-      </div>
-    );
+  if (loading) return <Loader3D />;
   if (!data)
     return (
       <div className="h-screen flex items-center justify-center text-white">
@@ -728,6 +725,7 @@ const Portfolio = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 className="text-5xl md:text-7xl font-bold mb-4"
+                style={{ fontFamily: "var(--font-hero)" }}
               >
                 <SplitText
                   text={data.profile.name}
@@ -756,8 +754,9 @@ const Portfolio = () => {
                     href={data.profile.github}
                     target="_blank"
                     rel="noreferrer"
-                    className="block px-8 py-3 border border-accent text-accent hover:bg-accent hover:text-primary transition rounded-full font-medium"
+                    className="flex items-center gap-2 px-8 py-3 border border-accent text-accent hover:bg-accent hover:text-primary transition rounded-full font-medium"
                   >
+                    <FaIcons.FaGithub size={20} />
                     GitHub
                   </a>
                 </Magnet>
@@ -766,16 +765,31 @@ const Portfolio = () => {
                     href={data.profile.linkedin}
                     target="_blank"
                     rel="noreferrer"
-                    className="block px-8 py-3 bg-accent text-primary hover:bg-opacity-90 transition rounded-full font-medium"
+                    className="flex items-center gap-2 px-8 py-3 bg-accent text-primary hover:bg-opacity-90 transition rounded-full font-medium"
                   >
+                    <FaIcons.FaLinkedin size={20} />
                     LinkedIn
+                  </a>
+                </Magnet>
+                <Magnet>
+                  <a
+                    href={`https://wa.me/${data.profile.phone.replace(
+                      /[^0-9]/g,
+                      ""
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block px-8 py-3 border hover:border-green-500 hover:text-green-500 transition rounded-full font-medium flex items-center gap-2"
+                  >
+                    <FaIcons.FaWhatsapp size={20} />
+                    WhatsApp
                   </a>
                 </Magnet>
               </motion.div>
             </div>
 
             <div className="order-1 md:order-2 flex-1 flex justify-center z-10">
-              <FluidImage
+              <BlobImage
                 src={data.profile.avatar || "https://via.placeholder.com/400"}
                 alt="Profile"
               />
@@ -832,6 +846,29 @@ const Portfolio = () => {
             </motion.div>
           </div>
         </motion.section>
+
+        {/* Education Section */}
+        {data.settings?.showEducation &&
+          data.education &&
+          data.education.length > 0 && (
+            <motion.section
+              id="education"
+              className="py-20 px-6 relative z-10"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={containerVariants}
+            >
+              <div className="max-w-7xl mx-auto relative z-10">
+                <ScrollFloat>
+                  <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-white">
+                    <ShinyText text="Academic Background" />
+                  </h2>
+                </ScrollFloat>
+                <EducationTimeline education={data.education} />
+              </div>
+            </motion.section>
+          )}
 
         {/* Experience Section */}
         <motion.section

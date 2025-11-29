@@ -40,12 +40,7 @@
       "SSH",
       "HTTPS Setup"
     ],
-    "Tools": [
-      "Termius",
-      "PuTTY",
-      "Git/GitHub",
-      "VS Code"
-    ]
+    "Tools": ["Termius", "PuTTY", "Git/GitHub", "VS Code"]
   },
   "professional_skills": [
     "Full-Stack Application Development",
@@ -88,10 +83,14 @@
   ],
   "education": [
     {
+      "id": "edu-1",
       "degree": "Bachelor of Commerce",
-      "institution": "St. Joseph's College of Arts And Science - Autonomous",
+      "institution": "St. Joseph's College",
       "location": "Cuddalore, India",
-      "period": "2017 – 2020"
+      "period": "2017 - 2020",
+      "grade": "",
+      "description": "Studied core commerce subjects including accounting, economics, business management, and finance.",
+      "logo": ""
     }
   ],
   "certifications": [
@@ -102,13 +101,8 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": [
-    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
-  ],
-  "languages": [
-    "Tamil",
-    "English"
-  ],
+  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
+  "languages": ["Tamil", "English"],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/"
@@ -141,5 +135,8 @@
       "description": "",
       "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763922078/portfolio/xns2kz5gn96anb1krtkq.jpg"
     }
-  ]
+  ],
+  "settings": {
+    "showEducation": true
+  }
 }

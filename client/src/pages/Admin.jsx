@@ -126,6 +126,20 @@ const Admin = () => {
         }
       });
 
+      // Upload education logos if staged
+      Object.entries(stagedImages.education).forEach(([id, imageData]) => {
+        if (imageData.file) {
+          uploadPromises.push(
+            handleFileUpload(imageData.file).then(async (url) => {
+              if (imageData.oldUrl && imageData.oldUrl.startsWith("http")) {
+                await deleteCloudinaryImage(imageData.oldUrl);
+              }
+              return { type: "education", id, url };
+            })
+          );
+        }
+      });
+
       // Wait for all uploads
       const uploadResults = await Promise.all(uploadPromises);
 
@@ -138,6 +152,11 @@ const Admin = () => {
           const achievement = updatedData.achievements.find((a) => a.id === id);
           if (achievement) {
             achievement.image = url;
+          }
+        } else if (type === "education") {
+          const edu = updatedData.education.find((e) => e.id === id);
+          if (edu) {
+            edu.logo = url;
           }
         } else if (type === "project") {
           // Replace blob preview URL with real Cloudinary URL
@@ -152,7 +171,6 @@ const Admin = () => {
           }
         }
       });
-
       // Save to GitHub
       await axios.post("/api/portfolio", updatedData, {
         headers: {
@@ -168,6 +186,7 @@ const Admin = () => {
         profile: null,
         achievements: {},
         projects: {},
+        education: {},
       });
 
       toast.success("Saved successfully!", {
@@ -421,6 +440,7 @@ const Admin = () => {
                     { id: "experience", label: "Experience", icon: "💼" },
                     { id: "projects", label: "Projects", icon: "🚀" },
                     { id: "achievements", label: "Achievements", icon: "🏆" },
+                    { id: "education", label: "Education", icon: "🎓" },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -1410,6 +1430,365 @@ const Admin = () => {
                           <p>No achievements added yet</p>
                           <p className="text-sm mt-2">
                             Click "Add New Achievement" to get started
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Education Management */}
+                {activeTab === "education" && (
+                  <div>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-accent">
+                        Education
+                      </h2>
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center cursor-pointer">
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              className="sr-only"
+                              checked={data.settings?.showEducation ?? true}
+                              onChange={(e) => {
+                                handleChange(
+                                  "settings",
+                                  "showEducation",
+                                  e.target.checked
+                                );
+                              }}
+                            />
+                            <div
+                              className={`block w-14 h-8 rounded-full transition-colors ${
+                                data.settings?.showEducation
+                                  ? "bg-accent"
+                                  : "bg-gray-600"
+                              }`}
+                            ></div>
+                            <div
+                              className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                                data.settings?.showEducation
+                                  ? "transform translate-x-6"
+                                  : ""
+                              }`}
+                            ></div>
+                          </div>
+                          <div className="ml-3 text-gray-300 font-medium">
+                            {data.settings?.showEducation
+                              ? "Visible"
+                              : "Hidden"}
+                          </div>
+                        </label>
+                        <button
+                          onClick={() => {
+                            const newEdu = {
+                              id: `edu-${Date.now()}`,
+                              degree: "",
+                              institution: "",
+                              location: "",
+                              period: "",
+                              grade: "",
+                              description: "",
+                              logo: "",
+                            };
+                            setData((prev) => ({
+                              ...prev,
+                              education: [newEdu, ...(prev.education || [])],
+                            }));
+                          }}
+                          className="bg-accent text-primary px-4 py-2 rounded font-bold hover:bg-opacity-90 flex items-center gap-2"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                          Add Education
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      {data.education?.map((edu, index) => (
+                        <div
+                          key={edu.id}
+                          className="bg-secondary p-6 rounded-xl border border-gray-700"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-bold text-white">
+                              {edu.degree || "New Education"}
+                            </h3>
+                            <button
+                              onClick={() => {
+                                setConfirmDialog({
+                                  isOpen: true,
+                                  title: "Delete Education",
+                                  message:
+                                    "Are you sure you want to delete this education entry?",
+                                  onConfirm: () => {
+                                    const newList = data.education.filter(
+                                      (e) => e.id !== edu.id
+                                    );
+                                    setData((prev) => ({
+                                      ...prev,
+                                      education: newList,
+                                    }));
+                                    setConfirmDialog({
+                                      ...confirmDialog,
+                                      isOpen: false,
+                                    });
+                                  },
+                                });
+                              }}
+                              className="text-red-500 hover:text-red-400 p-2"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Degree / Course
+                              </label>
+                              <input
+                                type="text"
+                                value={edu.degree || ""}
+                                onChange={(e) => {
+                                  const newList = [...data.education];
+                                  newList[index].degree = e.target.value;
+                                  setData((prev) => ({
+                                    ...prev,
+                                    education: newList,
+                                  }));
+                                }}
+                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g. Bachelor of Computer Science"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Institution
+                              </label>
+                              <input
+                                type="text"
+                                value={edu.institution || ""}
+                                onChange={(e) => {
+                                  const newList = [...data.education];
+                                  newList[index].institution = e.target.value;
+                                  setData((prev) => ({
+                                    ...prev,
+                                    education: newList,
+                                  }));
+                                }}
+                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g. University Name"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Location
+                              </label>
+                              <input
+                                type="text"
+                                value={edu.location || ""}
+                                onChange={(e) => {
+                                  const newList = [...data.education];
+                                  newList[index].location = e.target.value;
+                                  setData((prev) => ({
+                                    ...prev,
+                                    education: newList,
+                                  }));
+                                }}
+                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g. City, Country"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Period
+                              </label>
+                              <input
+                                type="text"
+                                value={edu.period || ""}
+                                onChange={(e) => {
+                                  const newList = [...data.education];
+                                  newList[index].period = e.target.value;
+                                  setData((prev) => ({
+                                    ...prev,
+                                    education: newList,
+                                  }));
+                                }}
+                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g. 2018 - 2022"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-400">
+                                Grade / CGPA (Optional)
+                              </label>
+                              <input
+                                type="text"
+                                value={edu.grade || ""}
+                                onChange={(e) => {
+                                  const newList = [...data.education];
+                                  newList[index].grade = e.target.value;
+                                  setData((prev) => ({
+                                    ...prev,
+                                    education: newList,
+                                  }));
+                                }}
+                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
+                                placeholder="e.g. CGPA: 8.5/10"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 mt-4">
+                            <label className="block text-sm font-medium text-gray-400">
+                              Description
+                            </label>
+                            <textarea
+                              value={edu.description || ""}
+                              onChange={(e) => {
+                                const newList = [...data.education];
+                                newList[index].description = e.target.value;
+                                setData((prev) => ({
+                                  ...prev,
+                                  education: newList,
+                                }));
+                              }}
+                              className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-24 resize-none transition-colors"
+                              placeholder="Brief description of your studies..."
+                            />
+                          </div>
+
+                          <div className="space-y-2 mt-4">
+                            <label className="block text-sm font-medium text-gray-400">
+                              Institution Logo (Small)
+                            </label>
+                            <div className="flex items-center gap-4">
+                              {edu.logo && (
+                                <ImagePreview
+                                  src={getAssetUrl(edu.logo)}
+                                  onRemove={() => {
+                                    const newList = [...data.education];
+                                    newList[index].logo = "";
+                                    setData((prev) => ({
+                                      ...prev,
+                                      education: newList,
+                                    }));
+                                    // Remove from staged images
+                                    setStagedImages((prev) => {
+                                      const newStaged = { ...prev };
+                                      delete newStaged.education[edu.id];
+                                      return newStaged;
+                                    });
+                                  }}
+                                  isStaged={
+                                    stagedImages.education[edu.id]?.file
+                                  }
+                                />
+                              )}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (!file) return;
+
+                                  // Stage the image
+                                  const preview = URL.createObjectURL(file);
+                                  setStagedImages((prev) => ({
+                                    ...prev,
+                                    education: {
+                                      ...prev.education,
+                                      [edu.id]: {
+                                        file,
+                                        preview,
+                                        oldUrl: edu.logo,
+                                      },
+                                    },
+                                  }));
+
+                                  // Update data with preview
+                                  const newList = [...data.education];
+                                  newList[index].logo = preview;
+                                  setData((prev) => ({
+                                    ...prev,
+                                    education: newList,
+                                  }));
+
+                                  e.target.value = "";
+                                }}
+                                className="flex-1 text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
+                              />
+                            </div>
+                            {stagedImages.education[edu.id] && (
+                              <p className="text-yellow-500 text-sm flex items-center gap-2">
+                                <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                                Image staged - click Save to upload
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {(!data.education || data.education.length === 0) && (
+                        <div className="text-center py-12 text-gray-400">
+                          <svg
+                            className="w-16 h-16 mx-auto mb-4 opacity-50"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 14l9-5-9-5-9 5 9 5z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
+                            />
+                          </svg>
+                          <p>No education entries added yet</p>
+                          <p className="text-sm mt-2">
+                            Click "Add Education" to get started
                           </p>
                         </div>
                       )}

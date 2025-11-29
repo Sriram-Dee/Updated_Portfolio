@@ -21,6 +21,7 @@ const Admin = () => {
     profile: null, // { file: File, preview: string, oldUrl: string }
     achievements: {}, // { achievementId: { file, preview } }
     projects: {}, // { imageId: { file, preview, projectIndex } }
+    education: {},
   });
   const navigate = useNavigate();
 
@@ -1727,7 +1728,7 @@ const Admin = () => {
                                   setStagedImages((prev) => ({
                                     ...prev,
                                     education: {
-                                      ...prev.education,
+                                      ...(prev.education || {}),
                                       [edu.id]: {
                                         file,
                                         preview,
@@ -1749,7 +1750,7 @@ const Admin = () => {
                                 className="flex-1 text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
                               />
                             </div>
-                            {stagedImages.education[edu.id] && (
+                            {stagedImages.education?.[edu.id] && (
                               <p className="text-yellow-500 text-sm flex items-center gap-2">
                                 <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
                                 Image staged - click Save to upload

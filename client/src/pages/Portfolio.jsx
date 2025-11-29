@@ -747,7 +747,7 @@ const Portfolio = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
-                className="mt-4 flex gap-4 justify-center md:justify-start"
+                className="mt-4 flex flex-wrap gap-4 justify-center md:justify-start"
               >
                 <Magnet>
                   <a
@@ -988,7 +988,7 @@ const Portfolio = () => {
                         <div className="hidden md:block w-8" />
 
                         {/* Experience card - right side */}
-                        <div className="flex-1 md:max-w-lg ml-12 md:ml-0">
+                        <div className="flex-1 md:max-w-lg ml-8 md:ml-0">
                           <motion.div
                             whileHover={{
                               scale: 1.02,
@@ -1092,7 +1092,7 @@ const Portfolio = () => {
                     ) : (
                       <>
                         {/* Experience card - left side */}
-                        <div className="flex-1 md:max-w-lg ml-12 md:ml-0">
+                        <div className="flex-1 md:max-w-lg ml-8 md:ml-0">
                           <motion.div
                             whileHover={{
                               scale: 1.02,

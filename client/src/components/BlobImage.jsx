@@ -15,7 +15,7 @@ const BlobImage = ({ src, alt }) => {
       const randomBorderRadius = () => {
         const values = [];
         for (let i = 0; i < 8; i++) {
-          values.push(Math.floor(Math.random() * 30) + 30); // 30-60%
+          values.push(Math.floor(Math.random() * 80) + 40); // 30-60%
         }
         return `${values[0]}% ${values[1]}% ${values[2]}% ${values[3]}% / ${values[4]}% ${values[5]}% ${values[6]}% ${values[7]}%`;
       };
@@ -29,7 +29,7 @@ const BlobImage = ({ src, alt }) => {
     animateBlob();
 
     // Animate every 3 seconds
-    const interval = setInterval(animateBlob, 3000);
+    const interval = setInterval(animateBlob, 2000);
 
     return () => clearInterval(interval);
   }, []);

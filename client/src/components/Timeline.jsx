@@ -28,7 +28,7 @@ const Timeline = ({ achievements = [] }) => {
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       <div className="relative">
         {/* Vertical line with glow effect */}
-        <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent">
+        <div className="absolute left-0 sm:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent">
           <div className="absolute inset-0 bg-accent/20 blur-sm" />
         </div>
 
@@ -39,10 +39,10 @@ const Timeline = ({ achievements = [] }) => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ delay: index * 0.1, duration: 0.6 }}
-            className="relative pl-16 sm:pl-20 pb-10 last:pb-0 group"
+            className="relative pl-6 sm:pl-20 pb-10 last:pb-0 group"
           >
             {/* Timeline dot with pulse animation */}
-            <div className="absolute left-4 sm:left-6 top-3 z-20">
+            <div className="absolute -left-1 sm:left-6 top-3 z-20">
               {/* Main dot */}
               <motion.div
                 initial={{ scale: 0 }}
@@ -122,7 +122,7 @@ const Timeline = ({ achievements = [] }) => {
                     </motion.div>
 
                     {/* Title and Issuer */}
-                    <div className="flex-1 min-w-0">
+                    <div className="shrink-1 grow-1 basis-1/2 min-w-0">
                       <motion.h3
                         className="text-lg sm:text-xl font-bold text-white group-hover:text-accent transition-colors duration-300 leading-tight mb-2"
                         whileHover={{ x: 1 }}

@@ -25,7 +25,7 @@ const EducationTimeline = ({ education }) => {
             >
               {/* Timeline Node */}
               <div
-                className="absolute left-4 md:left-1/2 top-2 
+                className="absolute left-0 md:left-1/2 top-2 
                 -translate-x-1/2 z-20"
               >
                 <div
@@ -43,6 +43,7 @@ const EducationTimeline = ({ education }) => {
               {/* Desktop alternating layout */}
               <div
                 className={`
+                  pl-4
                   mt-10 md:mt-0 
                   md:w-1/2 
                   ${

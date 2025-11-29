@@ -84,6 +84,13 @@
       "location": "Cuddalore",
       "period": "March 2024 – Present",
       "description": "Developed full-stack apps using React.js, Node.js, and MongoDB with RESTful APIs. Implemented JWT authentication, GridFS file management, and handled DevOps deployment using Docker, Nginx, and PM2. Collaborated in Agile sprints and managed version control with Git/GitHub."
+    },
+    {
+      "role": "Virtual Auditor - Trainee",
+      "company": "Hema's Enterprise Pvt Ltd",
+      "location": "Cuddalore ",
+      "period": "Jan 2023 - Aug 2023",
+      "description": "Implemented cutting-edge virtual supervision system for\r\nmilk trucks, utilizing GPS tracking and real-time data\r\nanalysis to enhance visibility of warehouses,\r\nmanufacturing facilities, and milk collection centers,\r\nResulting in a 20% reduction in delivery time anda 10%\r\nincrease in overall operational efficiency for Cavinkare\r\nduring an 8-month period."
     }
   ],
   "education": [
@@ -135,7 +142,7 @@
       "issuer": "Hema's Enterprise Pvt Ltd",
       "date": "2025-03-16",
       "description": "Recognition for outstanding performance",
-      "image": null
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764417712/portfolio/acqg5eqka9ncskemqucq.jpg"
     },
     {
       "id": "achievement-1763921730677",

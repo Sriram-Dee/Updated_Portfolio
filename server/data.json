@@ -40,7 +40,12 @@
       "SSH",
       "HTTPS Setup"
     ],
-    "Tools": ["Termius", "PuTTY", "Git/GitHub", "VS Code"]
+    "Tools": [
+      "Termius",
+      "PuTTY",
+      "Git/GitHub",
+      "VS Code"
+    ]
   },
   "professional_skills": [
     "Full-Stack Application Development",
@@ -83,6 +88,16 @@
   ],
   "education": [
     {
+      "id": "edu-1764416665957",
+      "degree": "Master of Computer Applications",
+      "institution": "Madras University",
+      "location": "Chennai, India",
+      "period": "2025 - Present",
+      "grade": "",
+      "description": "Pursuing MCA through distance education with a focus on computer applications, software development, and modern IT technologies.",
+      "logo": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764417295/portfolio/mo3y7zwtmgxnhwwy2beh.jpg"
+    },
+    {
       "id": "edu-1",
       "degree": "Bachelor of Commerce",
       "institution": "St. Joseph's College",
@@ -90,7 +105,7 @@
       "period": "2017 - 2020",
       "grade": "",
       "description": "Studied core commerce subjects including accounting, economics, business management, and finance.",
-      "logo": ""
+      "logo": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764417295/portfolio/tr56rqmwtenupvff7txz.jpg"
     }
   ],
   "certifications": [
@@ -101,8 +116,13 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
-  "languages": ["Tamil", "English"],
+  "awards": [
+    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
+  ],
+  "languages": [
+    "Tamil",
+    "English"
+  ],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/"

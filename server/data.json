@@ -57,7 +57,7 @@
   "projects": [
     {
       "name": "SEC Training Management System",
-      "technologies": "React.js, Node.js, MongoDB",
+      "technologies": "React.js, Tailwindcss, Node.js, MongoDB",
       "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
       "period": "March 2025 – Present",
       "images": [
@@ -70,11 +70,50 @@
     {
       "name": "Tune For 2",
       "technologies": "React.js, Spring Boot, MongoDB",
-      "description": "Built a custom song ordering platform with React front-end and Java Spring Boot backend.",
+      "description": "Designed a responsive UI with React.js for seamless navigation. Created a custom audio player to ensure multimedia compatibility. Collaborated with the team to refine project strategies. Managed content and orders via an admin panel and integrated email\nfunctionality. Ensured a robust backend integration using Java Spring Boot and\nMongoDB for scalability.",
       "period": "April 2024 – September 2024",
       "images": [
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763998168/portfolio/hjq1qug0gkt6n2rhxfdp.jpg"
-      ]
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763998168/portfolio/hjq1qug0gkt6n2rhxfdp.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690649/portfolio/me6gx6wmflnay4tllf8c.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690649/portfolio/yp9mhuji0prhnw7fn3q4.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690649/portfolio/o3ajelheju9pstjt26lj.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690650/portfolio/pz27kdzszy4m4ewyktho.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690649/portfolio/sguiffydjfjdvpgumnsh.png"
+      ],
+      "demoUrl": "https://tunefor2.com"
+    },
+    {
+      "name": "Car Configurator (POC)",
+      "technologies": "React.js, Three.js, React Thee Fiber, WebGL",
+      "description": "Developed an advanced interactive car customization tool that offers users a seamless experience for exploring and modifying both the exterior and interior of a car.\n•Performance Optimization:\nUtilized React Three Fiber and Three.js to ensure high-\nperformance rendering and interactivity for both\ndesktop and mobile platforms.\n•User Experience:\nCreated an intuitive and visually appealing user\ninterface that enhances engagement and accessibility.",
+      "period": "",
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690654/portfolio/cafapmi7jm19csywntia.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690654/portfolio/bnsn7thal2ys0z12fdos.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690650/portfolio/ssihu4xwh8wblwfxxmec.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690652/portfolio/krbtcphbb5xzr81pukq2.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/cvdi1vensldl2mhr1jf1.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690654/portfolio/eyij3vx1aeyntruqgc5z.png"
+      ],
+      "demoUrl": "https://dev.digifox.studio/Demo/carconfiguratorapp/",
+      "githubUrl": ""
+    },
+    {
+      "name": "Jwelle Configurator (POC)",
+      "technologies": "React.js, Three.js, React Thee Fiber ",
+      "description": "Advanced Product Customization:\nDeveloped a highly interactive jewelry configuration tool enabling users to explore, customize, and visualize rings and chains in real time with precision and clarity.\n• Performance Optimization:\nImplemented React Three Fiber and Three.js to deliver smooth, high-fidelity 3D rendering optimized for both desktop and mobile devices, ensuring fast load times and responsive interactions.\n• User Experience:\nDesigned an elegant and intuitive interface that simplifies complex customization steps, increasing user engagement and making premium jewelry personalization accessible to all customers.",
+      "period": "",
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690652/portfolio/mngxa9bd8fvbgi5vku17.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/hiteryh2f4ffdvvugxdd.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/bhab7epnmiae4c3zs6vk.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/kx8uruhdclrbi4bbtz54.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/ldhjqjlbl1aag2ya82aw.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/qpmokcvjymjtv4xqfzkj.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690652/portfolio/z2aznvh1kiarscoi1c4v.png"
+      ],
+      "demoUrl": "https://dev.digifox.studio/Demo/ringconfiguratorapp/",
+      "githubUrl": ""
     }
   ],
   "experience": [
@@ -86,11 +125,11 @@
       "description": "Developed full-stack apps using React.js, Node.js, and MongoDB with RESTful APIs. Implemented JWT authentication, GridFS file management, and handled DevOps deployment using Docker, Nginx, and PM2. Collaborated in Agile sprints and managed version control with Git/GitHub."
     },
     {
-      "role": "Virtual Auditor - Trainee",
+      "role": "Developer - Trainee",
       "company": "Hema's Enterprise Pvt Ltd",
       "location": "Cuddalore ",
-      "period": "Jan 2023 - Aug 2023",
-      "description": "Implemented cutting-edge virtual supervision system for\r\nmilk trucks, utilizing GPS tracking and real-time data\r\nanalysis to enhance visibility of warehouses,\r\nmanufacturing facilities, and milk collection centers,\r\nResulting in a 20% reduction in delivery time anda 10%\r\nincrease in overall operational efficiency for Cavinkare\r\nduring an 8-month period."
+      "period": "Jan 2023 - Feb 2024",
+      "description": "Learned and practiced HTML, CSS, JavaScript, React.js, and backend fundamentals.\r Developed basic UI layouts using AntD and MUI.\r Worked with Git, GitHub, and Agile sprints."
     }
   ],
   "education": [

@@ -8,7 +8,7 @@
     "location": "Cuddalore, India",
     "github": "https://github.com/Sriram-Dee",
     "linkedin": "https://www.linkedin.com/in/sriram-r-14s26d2019l",
-    "summary": "Results-driven Junior Full-Stack Developer with 2+ years of experience in building responsive, user-friendly web applications. Proficient in React.js, Redux, Three.js, React Three Fiber, Ant Design, MUI, Node.js, Express.js, RESTful APIs, and MongoDB. Hands-on with DevOps & deployment using Linux, Docker, Nginx, PM2, and SSH. Skilled in version control with Git/GitHub and practiced in Agile environments."
+    "summary": "React.js Developer with full-stack proficiency in the MERN ecosystem. I develop complete web solutions—from responsive UIs with Ant Design and interactive 3D visualizations with Three.js to secure REST APIs with Node.js/Express.js and MongoDB. Experienced in containerizing and deploying applications with Docker and Nginx."
   },
   "skills": {
     "Frontend": [
@@ -70,7 +70,7 @@
     {
       "name": "Tune For 2",
       "technologies": "React.js, Spring Boot, MongoDB",
-      "description": "Designed a responsive UI with React.js for seamless navigation. Created a custom audio player to ensure multimedia compatibility. Collaborated with the team to refine project strategies. Managed content and orders via an admin panel and integrated email\nfunctionality. Ensured a robust backend integration using Java Spring Boot and\nMongoDB for scalability.",
+      "description": "A commercial e-commerce platform that allows customers to commission professional, personalized songs as unique gifts for birthdays, anniversaries, and special occasions. This project involved creating a seamless frontend experience to capture complex customer requirements and streamline the custom song creation process.\nTechnologies Used: \nReact.js, JavaScript (ES6+), Responsive CSS, Node.js, Express.js, MongoDB, Ant Design.\n\nKey Contributions & Outcomes:\nDynamic User Interface: Engineered a responsive, multi-step order form with real-time input validation and clear progress indicators, simplifying the process of specifying song details, recipient information, and personalized lyrics.\n\nSeamless Integration: Built the frontend to consume RESTful APIs from a Node.js/Express.js backend, ensuring reliable data submission for order processing and secure file uploads for reference materials.\n\nProfessional UX/UI: Implemented a clean, visually engaging user interface using modern CSS practices and components from Ant Design, ensuring an optimal experience across all device types (desktop, tablet, mobile).\n\nProject Outcome: Delivered a client-facing application that serves as the primary sales channel for a custom music service, handling the entire customer journey from product discovery to order confirmation.\n",
       "period": "April 2024 – September 2024",
       "images": [
         "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763998168/portfolio/hjq1qug0gkt6n2rhxfdp.jpg",

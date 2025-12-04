@@ -2,13 +2,13 @@
   "profile": {
     "name": "Sriram R",
     "avatar": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763908753/portfolio/trdp0zshddypkobxyriv.jpg",
-    "title": "Junior Fullstack Developer",
+    "title": "Junior Software Engineer ",
     "email": "sriram14jeeva12@gmail.com",
     "phone": "+91 8667286277",
     "location": "Cuddalore, India",
     "github": "https://github.com/Sriram-Dee",
     "linkedin": "https://www.linkedin.com/in/sriram-r-14s26d2019l",
-    "summary": "Results-driven Junior Full-Stack Developer with 2.8+ years of experience in building responsive, user-friendly web applications. Proficient in React.js, Redux, Three.js, React Three Fiber, Ant Design, MUI, Node.js, Express.js, RESTful APIs, and MongoDB. Hands-on with DevOps & deployment using Linux, Docker, Nginx, PM2, and SSH. Skilled in version control with Git/GitHub and practiced in Agile environments."
+    "summary": "Results-driven Junior Full-Stack Developer with 2+ years of experience in building responsive, user-friendly web applications. Proficient in React.js, Redux, Three.js, React Three Fiber, Ant Design, MUI, Node.js, Express.js, RESTful APIs, and MongoDB. Hands-on with DevOps & deployment using Linux, Docker, Nginx, PM2, and SSH. Skilled in version control with Git/GitHub and practiced in Agile environments."
   },
   "skills": {
     "Frontend": [
@@ -128,8 +128,8 @@
       "role": "Developer - Trainee",
       "company": "Hema's Enterprise Pvt Ltd",
       "location": "Cuddalore ",
-      "period": "Jan 2023 - Feb 2024",
-      "description": "Learned and practiced HTML, CSS, JavaScript, React.js, and backend fundamentals.\r Developed basic UI layouts using AntD and MUI.\r Worked with Git, GitHub, and Agile sprints."
+      "period": "Jan 2023 - Aug 2023",
+      "description": "Learned and practiced HTML, CSS, JavaScript, React.js, and backend fundamentals. Developed basic UI layouts using AntD and MUI. Worked with Git, GitHub, and Agile sprints."
     }
   ],
   "education": [

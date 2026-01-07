@@ -83,32 +83,17 @@
       "technologies": "React.js, Three.js, React Thee Fiber, WebGL",
       "description": "Developed an advanced interactive car customization tool that offers users a seamless experience for exploring and modifying both the exterior and interior of a car.\n•Performance Optimization:\nUtilized React Three Fiber and Three.js to ensure high-\nperformance rendering and interactivity for both\ndesktop and mobile platforms.\n•User Experience:\nCreated an intuitive and visually appealing user\ninterface that enhances engagement and accessibility.",
       "period": "",
-      "images": [
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690654/portfolio/cafapmi7jm19csywntia.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690654/portfolio/bnsn7thal2ys0z12fdos.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690650/portfolio/ssihu4xwh8wblwfxxmec.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690652/portfolio/krbtcphbb5xzr81pukq2.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/cvdi1vensldl2mhr1jf1.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690654/portfolio/eyij3vx1aeyntruqgc5z.png"
-      ],
-      "demoUrl": "https://dev.digifox.studio/Demo/carconfiguratorapp/",
+      "images": [],
+      "demoUrl": "",
       "githubUrl": ""
     },
     {
-      "name": "Jwelle Configurator (POC)",
+      "name": "Jwelle Configurator",
       "technologies": "React.js, Three.js, React Thee Fiber ",
       "description": "Advanced Product Customization:\nDeveloped a highly interactive jewelry configuration tool enabling users to explore, customize, and visualize rings and chains in real time with precision and clarity.\n• Performance Optimization:\nImplemented React Three Fiber and Three.js to deliver smooth, high-fidelity 3D rendering optimized for both desktop and mobile devices, ensuring fast load times and responsive interactions.\n• User Experience:\nDesigned an elegant and intuitive interface that simplifies complex customization steps, increasing user engagement and making premium jewelry personalization accessible to all customers.",
       "period": "",
-      "images": [
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690652/portfolio/mngxa9bd8fvbgi5vku17.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/hiteryh2f4ffdvvugxdd.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/bhab7epnmiae4c3zs6vk.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/kx8uruhdclrbi4bbtz54.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/ldhjqjlbl1aag2ya82aw.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690653/portfolio/qpmokcvjymjtv4xqfzkj.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764690652/portfolio/z2aznvh1kiarscoi1c4v.png"
-      ],
-      "demoUrl": "https://dev.digifox.studio/Demo/ringconfiguratorapp/",
+      "images": [],
+      "demoUrl": "",
       "githubUrl": ""
     }
   ],

@@ -60,12 +60,8 @@
       "technologies": "React.js, Tailwindcss, Node.js, MongoDB",
       "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
       "period": "March 2025 – Present",
-      "images": [
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952612/portfolio/frg2h9recb9vfbz4zcbh.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952621/portfolio/lgcf1hbmkftvymrmnd3v.png",
-        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952633/portfolio/rnsnanvy1yphqsb4ywuf.png"
-      ],
-      "demoUrl": "https://tmsdemo.digifox.studio"
+      "images": [],
+      "demoUrl": ""
     },
     {
       "name": "Tune For 2",

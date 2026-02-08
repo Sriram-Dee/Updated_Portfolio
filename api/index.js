@@ -20,7 +20,7 @@ const {
   JWT_SECRET = "dev-secret-change-in-production",
   ADMIN_PASSWORD_HASH,
   EMAIL_USER,
-  EMAIL_APP_PASSWORD,
+  EMAIL_PASS,
   CONTACT_TO_EMAIL,
   GITHUB_TOKEN,
   GITHUB_OWNER,
@@ -305,7 +305,7 @@ app.post("/api/contact", async (req, res) => {
     }
 
     // Check if email is configured
-    if (!EMAIL_USER || !EMAIL_APP_PASSWORD) {
+    if (!EMAIL_USER || !EMAIL_PASS) {
       console.log("Contact form submission (email not configured):", {
         name,
         email,
@@ -322,7 +322,7 @@ app.post("/api/contact", async (req, res) => {
       service: "gmail",
       auth: {
         user: EMAIL_USER,
-        pass: EMAIL_APP_PASSWORD,
+        pass: EMAIL_PASS,
       },
     });
 

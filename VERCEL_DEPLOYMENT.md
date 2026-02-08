@@ -63,6 +63,7 @@ Based on your configuration, ensure these are present:
 | `GITHUB_TOKEN`     | Personal Access Token with `repo` scope |
 | `GITHUB_OWNER`     | Your GitHub Username                    |
 | `GITHUB_REPO`      | Your Repository Name                    |
+| `GITHUB_BRANCH`    | `v2_portfolio` (For v2 site)            |
 | `GITHUB_DATA_PATH` | `server/data.json` (Default for v2)     |
 
 ### Required for Logic
@@ -82,3 +83,11 @@ After deployment:
 2.  Go to `/admin` and try to log in.
 3.  Make a change (e.g., update a text field).
 4.  Check your GitHub repository to see if `server/data.json` was updated.
+
+## 5. Troubleshooting: "I can't see my new branch on Vercel"
+
+If you pushed your branch but it doesn't appear in Vercel's "Git Branch" list:
+
+1.  **Verify on GitHub**: Check https://github.com/Sriram-Dee/Updated_Portfolio/branches to ensure `v2-portfolio` exists.
+2.  **Create a Pull Request**: Vercel sometimes needs a "trigger". Go to GitHub and create a Pull Request from `v2-portfolio` into `main`. This **forces** Vercel to see the branch and create a Preview Deployment.
+3.  **Check Ignored Build Step**: In Vercel Settings > Git > "Ignored Build Step", ensure you haven't blocked new branches.

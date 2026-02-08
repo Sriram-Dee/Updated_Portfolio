@@ -25,6 +25,7 @@ const {
   GITHUB_TOKEN,
   GITHUB_OWNER,
   GITHUB_REPO,
+  GITHUB_BRANCH,
   GITHUB_DATA_PATH,
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
@@ -95,6 +96,7 @@ async function getDataFromGitHub() {
       owner: GITHUB_OWNER,
       repo: GITHUB_REPO,
       path: GITHUB_DATA_PATH || "server/data.json",
+      ref: GITHUB_BRANCH || undefined,
     });
 
     const content = Buffer.from(data.content, "base64").toString("utf-8");
@@ -115,6 +117,7 @@ async function saveDataToGitHub(data, sha) {
     owner: GITHUB_OWNER,
     repo: GITHUB_REPO,
     path: GITHUB_DATA_PATH || "server/data.json",
+    branch: GITHUB_BRANCH || undefined,
     message: "Update portfolio data",
     content,
     sha: sha || undefined,

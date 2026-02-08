@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Code2,
   Github,
@@ -16,6 +18,9 @@ import {
 import SectionHeader from "./SectionHeader";
 import ProgressiveImage from "@/components/ui/ProgressiveImage";
 import { optimizeImage } from "@/utils/helpers";
+
+// Register ScrollTrigger immediately
+gsap.registerPlugin(ScrollTrigger);
 
 // ... (Lightbox component remains effectively unchanged, but good to check if we should replace img there too. The prompt said "every where". Let's do it.)
 
@@ -447,146 +452,104 @@ const Projects = ({ projects }) => {
   // ... (GSAP logic omitted, assumed unchanged from previous view) ...
   // GSAP ScrollTrigger for mobile rummy card stacking
   useLayoutEffect(() => {
-    let ctx;
+    // Register plugin
+    gsap.registerPlugin(ScrollTrigger);
 
-    // Only run on mobile
-    if (!isMobile) {
-      // Ensure everything is cleared if we switch to desktop
-      import("gsap").then(({ gsap }) => {
-        import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-          ScrollTrigger.getAll().forEach((t) => t.kill());
-          if (cardsRef.current.length > 0) {
-            gsap.set(cardsRef.current, { clearProps: "all" });
-          }
-          if (containerRef.current)
-            gsap.set(containerRef.current, { clearProps: "all" });
+    const mm = gsap.matchMedia();
+
+    mm.add("(max-width: 767px)", () => {
+      // Clean up any potential scroll interfering styles
+      ScrollTrigger.normalizeScroll(false);
+
+      if (!containerRef.current || !sectionRef.current) return;
+
+      const cards = cardsRef.current.filter(Boolean);
+      if (cards.length === 0) return;
+
+      // Ensure container has height for sticky to work with absolute children
+      gsap.set(containerRef.current, { height: 400 });
+
+      // Set initial state for cards
+      cards.forEach((card, i) => {
+        gsap.set(card, {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: i + 1,
+          boxShadow: "0 -20px 60px -15px rgba(0,0,0,0.8)",
+          y: i === 0 ? "0%" : "250%",
+          rotation: i === 0 ? 1.5 : i % 2 === 0 ? 10 : -10,
         });
       });
-      return;
-    }
 
-    if (!sectionRef.current || !containerRef.current) return;
+      // Animation Timeline
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current, // Use the SECTION as the trigger
+          start: "top top", // Start when section hits top
+          end: "bottom bottom", // End when section leaves
+          scrub: 1,
+          preventOverlaps: true,
+          invalidateOnRefresh: true,
+        },
+      });
 
-    const initGsap = async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
+      // Animate base card
+      tl.to(
+        cards[0],
+        {
+          rotation:
+            (Math.random() * 1.5 + 1.5) * (Math.random() > 0.5 ? 1 : -1),
+          ease: "none",
+          duration: cards.length - 1,
+        },
+        0,
+      );
 
-      // Refresh to ensure positions are correct
-      ScrollTrigger.refresh();
+      // Animate stack
+      cards.slice(1).forEach((card, i) => {
+        const cardIndex = i + 1;
+        const endRotation =
+          (Math.random() * 1.5 + 1.5) * (i % 2 === 0 ? 1 : -1);
 
-      // Create a context for easy cleanup
-      ctx = gsap.context(() => {
-        const cards = cardsRef.current.filter(Boolean);
-
-        if (cards.length === 0) return;
-
-        // Set initial state for cards - later cards have HIGHER z-index (on top)
-        cards.forEach((card, i) => {
-          gsap.set(card, {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: i + 1, // Later cards on top
-            boxShadow: "0 -20px 60px -15px rgba(0,0,0,0.8)",
-            // Card 0 starts at 1.5deg, others start deep below view
-            y: i === 0 ? "0%" : "250%",
-            rotation: i === 0 ? 1.5 : i % 2 === 0 ? 10 : -10,
-          });
-        });
-
-        // Create a master timeline for the stacking animation
-        const totalScrollDistance = (cards.length - 1) * 150; // Slower pace for smoother feel
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: containerRef.current, // Pin the CARDS container, not the whole section
-            start: "top 100px", // Pin below navbar (approx 80px) + gap
-            end: `+=${totalScrollDistance}`,
-            scrub: 1, // Smooth scrubbing with inertia
-            pin: true,
-            pinSpacing: true, // Handle spacing automatically
-            pinReparent: true, // Move to body to avoid stacking context issues
-            preventOverlaps: true, // Prevent scroll jumping
-            invalidateOnRefresh: true, // Handle resize better
-            anticipatePin: 1, // Fix visual jump when pinning starts
-          },
-        });
-
-        // Animate base card (index 0) rotation smoothly throughout the scroll
         tl.to(
-          cards[0],
+          card,
           {
-            rotation:
-              (Math.random() * 1.5 + 1.5) * (Math.random() > 0.5 ? 1 : -1), // Random end between 1.5 and 3 deg
+            y: `${cardIndex * 18}%`,
+            rotation: endRotation,
             ease: "none",
-            duration: cards.length - 1,
+            duration: 1,
           },
-          0,
+          i,
         );
+      });
 
-        // Animate each other card (skipping the first one)
-        cards.slice(1).forEach((card, i) => {
-          const cardIndex = i + 1;
-          const endRotation =
-            (Math.random() * 1.5 + 1.5) * (i % 2 === 0 ? 1 : -1); // Alternating messy rotation
+      return () => {
+        // cleanup
+      };
+    });
 
-          // Use 'i' as start time (0, 1, 2...) so they play sequentially
-          // duration: 1 ensures perfect sequence
-          tl.to(
-            card,
-            {
-              y: `${cardIndex * 18}%`, // Stack with 18% offset
-              rotation: endRotation,
-              ease: "none", // Linear ease for direct scroll mapping
-              duration: 1,
-            },
-            i,
-          ); // Start at time 'i'
-        });
-      }, sectionRef); // Scope the context to the section
-    };
+    return () => mm.revert();
+  }, [showAll, displayedProjects.length]);
 
-    initGsap();
-
-    return () => {
-      // Revert the entire context when unmounting or changing dependencies
-      if (ctx) ctx.revert();
-    };
-  }, [isMobile, showAll, displayedProjects.length]);
-
-  // Standard animation for cards
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  if (!projects?.length) return null;
-
-  // Calculate dynamic height for mobile container to remove blank space
-  // Base card ~380px + (number of stacked cards * offset approx 60px)
-  const mobileContainerHeight = isMobile
-    ? 380 + (displayedProjects.length - 1) * 60
-    : 0;
+  // CSS Sticky Calculation
+  const stackHeight = 400; // Height of the card stack
+  const scrollDistance = (displayedProjects.length - 1) * 150;
+  const sectionHeight = isMobile ? stackHeight + scrollDistance + 200 : "auto"; // Extra buffer
 
   return (
     <section
       ref={sectionRef}
-      id="projects"
-      className="section relative overflow-hidden"
+      className={
+        isMobile ? "section relative" : "section relative overflow-hidden"
+      }
       style={{
-        minHeight: "auto",
-        paddingBottom: isMobile ? 0 : undefined, // Remove bottom padding on mobile to reduce blank space
+        minHeight: isMobile ? `${sectionHeight}px` : "auto",
+        paddingBottom: isMobile ? 0 : undefined,
       }}
     >
-      {" "}
-      {/* Subtle Background */}
+      {/* ... Background ... */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-white/[0.015] rounded-full blur-[150px]" />
       </div>
@@ -601,9 +564,21 @@ const Projects = ({ projects }) => {
         <div
           ref={containerRef}
           className={
-            isMobile ? "relative" : "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            isMobile
+              ? "relative w-full"
+              : "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
           }
-          style={isMobile ? { height: `${mobileContainerHeight}px` } : {}}
+          style={
+            isMobile
+              ? {
+                  position: "sticky",
+                  top: "100px",
+                  height: `${stackHeight}px`,
+                  // Ensure it doesn't overflow horizontally
+                  overflow: "visible",
+                }
+              : {}
+          }
         >
           {displayedProjects.map((project, index) => (
             <div

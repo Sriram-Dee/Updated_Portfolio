@@ -85,7 +85,8 @@
       "period": "",
       "images": [],
       "demoUrl": "",
-      "githubUrl": ""
+      "githubUrl": "",
+      "enabled": false
     },
     {
       "name": "Jwelle Configurator",

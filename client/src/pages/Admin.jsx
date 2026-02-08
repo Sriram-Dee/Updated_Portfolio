@@ -321,6 +321,12 @@ const ProfileTab = ({ data, onChange, onPreview }) => {
             onChange={(e) => handleChange("website", e.target.value)}
             placeholder="https://yourwebsite.com"
           />
+          <Input
+            label="Other Portfolio URL"
+            value={data.other_portfolio || ""}
+            onChange={(e) => handleChange("other_portfolio", e.target.value)}
+            placeholder="https://v1.portfolio.com"
+          />
         </div>
       </SectionCard>
     </div>

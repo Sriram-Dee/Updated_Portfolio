@@ -9,6 +9,8 @@ import Experience from "@/components/portfolio/Experience";
 import Contact from "@/components/portfolio/Contact";
 import Footer from "@/components/portfolio/Footer";
 
+import PageLoader from "@/components/ui/PageLoader";
+
 const Portfolio = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,8 @@ const Portfolio = () => {
         console.error("Failed to fetch data:", error);
         toast.error("Could not load portfolio data");
       } finally {
-        setLoading(false);
+        // Minimum load time for animation
+        setTimeout(() => setLoading(false), 2000);
       }
     };
     fetchPortfolio();
@@ -52,16 +55,7 @@ const Portfolio = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-          <p className="text-text-secondary animate-pulse">
-            Loading experience...
-          </p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // Filter sections based on settings
@@ -113,7 +107,7 @@ const Portfolio = () => {
         )}
       </main>
 
-      <Footer />
+      <Footer profile={data?.profile} />
     </div>
   );
 };

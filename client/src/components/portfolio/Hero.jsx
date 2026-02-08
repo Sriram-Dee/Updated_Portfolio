@@ -10,6 +10,7 @@ import {
 import { scrollToSection, optimizeImage } from "@/utils/helpers";
 import SocialButton from "./SocialButton";
 import OrbitingText from "./OrbitingText";
+import ProgressiveImage from "@/components/ui/ProgressiveImage";
 import React from "react";
 
 const Hero = ({ profile }) => {
@@ -145,10 +146,12 @@ const Hero = ({ profile }) => {
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
 
                 {profile?.avatar ? (
-                  <img
-                    src={optimizeImage(profile.avatar, 500)}
+                  <ProgressiveImage
+                    src={profile.avatar}
+                    width={500}
+                    priority={true}
                     alt={profile.name}
-                    className="w-full h-full object-cover transform scale-105 group-hover:scale-110 transition-transform duration-1000 ease-out"
+                    className="w-full h-full transform scale-105 group-hover:scale-110 transition-transform duration-1000 ease-out"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-surface-elevated text-secondary">

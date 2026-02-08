@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Award, X, ExternalLink } from "lucide-react";
 import { optimizeImage } from "@/utils/helpers";
+import ProgressiveImage from "@/components/ui/ProgressiveImage";
 
 const Achievements = ({ achievements }) => {
   const [selectedAchievement, setSelectedAchievement] = useState(null);
@@ -56,10 +57,11 @@ const Achievements = ({ achievements }) => {
 
             <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/10 flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
               {item.image ? (
-                <img
-                  src={optimizeImage(item.image, 200)}
+                <ProgressiveImage
+                  src={item.image}
+                  width={200}
                   alt={item.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
                 />
               ) : (
                 <Award size={28} className="text-yellow-400" />
@@ -119,8 +121,9 @@ const Achievements = ({ achievements }) => {
                 <X size={20} />
               </button>
               <div className="flex-1 min-h-0 w-full overflow-hidden bg-black/50 flex items-center justify-center p-4">
-                <img
-                  src={optimizeImage(selectedAchievement.image, 1200)}
+                <ProgressiveImage
+                  src={selectedAchievement.image}
+                  width={1200}
                   alt={selectedAchievement.name}
                   className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-lg"
                 />

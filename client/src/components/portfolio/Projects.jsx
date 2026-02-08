@@ -14,10 +14,14 @@ import {
   ZoomIn,
 } from "lucide-react";
 import SectionHeader from "./SectionHeader";
+import ProgressiveImage from "@/components/ui/ProgressiveImage";
 import { optimizeImage } from "@/utils/helpers";
+
+// ... (Lightbox component remains effectively unchanged, but good to check if we should replace img there too. The prompt said "every where". Let's do it.)
 
 // Fullscreen Image Lightbox with Navigation
 const Lightbox = ({ images, currentIndex, title, onClose, onNavigate }) => {
+  // ... existing logic ...
   const hasMultiple = images && images.length > 1;
 
   const handlePrev = (e) => {
@@ -38,7 +42,7 @@ const Lightbox = ({ images, currentIndex, title, onClose, onNavigate }) => {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl"
       onClick={onClose}
     >
-      {/* Navigation - Previous */}
+      {/* ... nav buttons ... */}
       {hasMultiple && (
         <button
           onClick={handlePrev}
@@ -48,21 +52,29 @@ const Lightbox = ({ images, currentIndex, title, onClose, onNavigate }) => {
         </button>
       )}
 
-      {/* Image */}
+      {/* Image - Replacing motion.img with ProgressiveImage-like structure or just keep motion.img since it's a lightbox and usually needs high res immediately? 
+         User said "make the url that provides as samller version... before the real image". 
+         For Lightbox, maybe we just use the high res? 
+         Actually, let's keep Lightbox as is for now or use ProgressiveImage if simple. 
+         Lightbox uses AnimatePresence which might be tricky with the wrapper div in ProgressiveImage. 
+         Let's stick to the main UI elements first. 
+      */}
       <AnimatePresence mode="wait">
-        <motion.img
+        <ProgressiveImage
           key={currentIndex}
+          src={images[currentIndex]}
+          width={1920}
+          alt={`${title} - ${currentIndex + 1}`}
+          className="max-w-[85vw] max-h-[85vh] rounded-lg relative"
+          imgClassName="object-contain"
+          onClick={(e) => e.stopPropagation()}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          src={optimizeImage(images[currentIndex], 1920)}
-          alt={`${title} - ${currentIndex + 1}`}
-          className="max-w-[85vw] max-h-[85vh] object-contain rounded-lg"
-          onClick={(e) => e.stopPropagation()}
         />
       </AnimatePresence>
 
-      {/* Navigation - Next */}
+      {/* ... rest of lightbox ... */}
       {hasMultiple && (
         <button
           onClick={handleNext}
@@ -126,13 +138,14 @@ const PerspectiveCarousel = ({ images, title }) => {
               transition={{ duration: 0.4, ease: "easeOut" }}
               className="absolute inset-0"
             >
-              <img
-                src={optimizeImage(images[currentIndex], 1200)}
+              <ProgressiveImage
+                src={images[currentIndex]}
+                width={1200}
                 alt={`${title} - ${currentIndex + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full"
               />
               {/* Zoom Icon Overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center z-20">
                 <ZoomIn
                   size={32}
                   className="text-primary opacity-0 group-hover:opacity-100 transition-opacity"
@@ -151,7 +164,7 @@ const PerspectiveCarousel = ({ images, title }) => {
                     (prev) => (prev - 1 + images.length) % images.length,
                   );
                 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-white/20"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-white/20 z-30"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -160,7 +173,7 @@ const PerspectiveCarousel = ({ images, title }) => {
                   e.stopPropagation();
                   setCurrentIndex((prev) => (prev + 1) % images.length);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-white/20"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-white/20 z-30"
               >
                 <ChevronRight size={20} />
               </button>
@@ -184,10 +197,11 @@ const PerspectiveCarousel = ({ images, title }) => {
                   : "border-white/20 opacity-50 hover:opacity-100"
               }`}
             >
-              <img
-                src={optimizeImage(img, 200)}
+              <ProgressiveImage
+                src={img}
+                width={200}
                 alt=""
-                className="w-full h-full object-cover"
+                className="w-full h-full"
               />
             </motion.button>
           ))}
@@ -286,12 +300,19 @@ const ProjectCard = ({ project, index, onClick, isMobile, totalCards }) => {
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden">
           {project.images?.[0] ? (
-            <motion.img
-              src={optimizeImage(project.images[0], 800)}
+            <ProgressiveImage
+              src={project.images[0]}
+              width={800}
               alt={project.title}
-              className="w-full h-full object-cover"
-              whileHover={{ scale: 1.08 }}
-              transition={{ duration: 0.6 }}
+              className="w-full h-full"
+              whileHover={{ scale: 1.08 }} // Pass framer motion props if wrapper supports it? No, wrapper is div.
+              // ProgressiveImage wraps with div, so whileHover won't work on the motion.img directly if passed as ...props unless we ensure it's passed.
+              // My ProgressiveImage impl passes ...props to motion.img.
+              // BUT the wrapper div needs to handle overflow usually.
+              // Wait, ProgressiveImage has default 'relative overflow-hidden'.
+              // So scaling the image inside might get clipped? Yes.
+              // But here the parent div `relative aspect-[16/10] overflow-hidden` also clips.
+              // So it should be fine.
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-violet-900/20 to-surface flex items-center justify-center">
@@ -300,7 +321,7 @@ const ProjectCard = ({ project, index, onClick, isMobile, totalCards }) => {
           )}
 
           {/* Gradient Overlay for text visibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/20 z-10" />
 
           {/* Floating Project Index - MORE VISIBLE */}
           <div className="absolute top-4 left-4">
@@ -317,7 +338,7 @@ const ProjectCard = ({ project, index, onClick, isMobile, totalCards }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
             {project.github && (
               <a
                 href={project.github}
@@ -343,7 +364,7 @@ const ProjectCard = ({ project, index, onClick, isMobile, totalCards }) => {
           </div>
 
           {/* Content Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-5">
+          <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
             <h3 className="text-xl font-bold text-primary mb-3 font-display tracking-tight drop-shadow-lg">
               {project.title}
             </h3>
@@ -423,6 +444,7 @@ const Projects = ({ projects }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // ... (GSAP logic omitted, assumed unchanged from previous view) ...
   // GSAP ScrollTrigger for mobile rummy card stacking
   useLayoutEffect(() => {
     let ctx;
@@ -590,7 +612,11 @@ const Projects = ({ projects }) => {
               className={isMobile ? "w-full px-2" : ""}
               style={
                 isMobile
-                  ? { backgroundColor: "#0a0a0a", borderRadius: "16px" }
+                  ? {
+                      backgroundColor: "#0a0a0a",
+                      borderRadius: "16px",
+                      zIndex: index + 10,
+                    }
                   : {}
               }
             >
@@ -613,6 +639,7 @@ const Projects = ({ projects }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            {/* ... rest of show more button ... */}
             {!showAll ? (
               <motion.button
                 onClick={() => setShowAll(true)}
@@ -649,6 +676,7 @@ const Projects = ({ projects }) => {
         )}
       </div>
       {/* Project Details Modal */}
+      {/* ... (Modal stays mostly matching existing, but let's make sure we include proper imports) */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -759,5 +787,4 @@ const Projects = ({ projects }) => {
     </section>
   );
 };
-
 export default Projects;

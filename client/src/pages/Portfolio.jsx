@@ -40,6 +40,13 @@ const Portfolio = () => {
     fetchPortfolio();
   }, []);
 
+  // Update document title
+  useEffect(() => {
+    if (data?.profile?.name) {
+      document.title = `${data.profile.name} | Portfolio`;
+    }
+  }, [data]);
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 300;

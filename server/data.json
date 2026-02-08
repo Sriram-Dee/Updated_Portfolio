@@ -1,4 +1,13 @@
 {
+  "theme": {
+    "primary": "#030712",
+    "secondary": "#0f172a",
+    "accent": "#8b5cf6",
+    "accent-secondary": "#2dd4bf",
+    "accent-tertiary": "#f472b6",
+    "text-primary": "#f8fafc",
+    "text-secondary": "#94a3b8"
+  },
   "profile": {
     "name": "Sriram R",
     "avatar": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763908753/portfolio/trdp0zshddypkobxyriv.jpg",
@@ -12,7 +21,10 @@
   },
   "skills": {
     "Frontend": [
-      "React.js",
+      {
+        "name": "React.js",
+        "enabled": true
+      },
       "Redux",
       "Three.js",
       "React Three Fiber",
@@ -65,7 +77,8 @@
         "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952621/portfolio/lgcf1hbmkftvymrmnd3v.png",
         "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952633/portfolio/rnsnanvy1yphqsb4ywuf.png"
       ],
-      "demoUrl": "https://tmsdemo.digifox.studio"
+      "demoUrl": "https://tmsdemo.digifox.studio",
+      "enabled": true
     },
     {
       "name": "Tune For 2",
@@ -74,7 +87,8 @@
       "period": "April 2024 – September 2024",
       "images": [
         "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763998168/portfolio/hjq1qug0gkt6n2rhxfdp.jpg"
-      ]
+      ],
+      "demoUrl": "https://tunefor2.com"
     }
   ],
   "experience": [
@@ -83,14 +97,15 @@
       "company": "Hema's Enterprise Pvt Ltd",
       "location": "Cuddalore",
       "period": "March 2024 – Present",
-      "description": "Developed full-stack apps using React.js, Node.js, and MongoDB with RESTful APIs. Implemented JWT authentication, GridFS file management, and handled DevOps deployment using Docker, Nginx, and PM2. Collaborated in Agile sprints and managed version control with Git/GitHub."
+      "description": "Developed full-stack apps using React.js, Node.js, and MongoDB with RESTful APIs. Implemented JWT authentication, GridFS file management, and handled DevOps deployment using Docker, Nginx, and PM2. Collaborated in Agile sprints and managed version control with Git/GitHub.",
+      "enabled": true
     },
     {
       "role": "Virtual Auditor - Trainee",
       "company": "Hema's Enterprise Pvt Ltd",
       "location": "Cuddalore ",
       "period": "Jan 2023 - Aug 2023",
-      "description": "Implemented cutting-edge virtual supervision system for\r\nmilk trucks, utilizing GPS tracking and real-time data\r\nanalysis to enhance visibility of warehouses,\r\nmanufacturing facilities, and milk collection centers,\r\nResulting in a 20% reduction in delivery time anda 10%\r\nincrease in overall operational efficiency for Cavinkare\r\nduring an 8-month period."
+      "description": "Implemented cutting-edge virtual supervision system for milk trucks, utilizing GPS tracking and real-time data analysis to enhance visibility of warehouses, manufacturing facilities, and milk collection centers, Resulting in a 20% reduction in delivery time anda 10% increase in overall operational efficiency for Cavinkare during an 8-month period."
     }
   ],
   "education": [

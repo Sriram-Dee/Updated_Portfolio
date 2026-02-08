@@ -1,51 +1,41 @@
-// components/ProtectedRoute.jsx
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyAuth = async () => {
+    const verifyToken = async () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setIsAuthenticated(false);
-        setLoading(false);
+        navigate("/login");
         return;
       }
 
       try {
-        // Set default authorization header
+        await axios.post(
+          "/api/verify-token",
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        // Token valid, set default header for future requests
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        // Verify token with server
-        await axios.get("/api/verify");
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Auth verification failed:", error);
+      } catch {
+        // Token invalid or expired
         localStorage.removeItem("token");
         delete axios.defaults.headers.common["Authorization"];
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
+        navigate("/login");
       }
     };
 
-    verifyAuth();
-  }, []);
+    verifyToken();
+  }, [navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-primary">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return children;
 };
 
 export default ProtectedRoute;

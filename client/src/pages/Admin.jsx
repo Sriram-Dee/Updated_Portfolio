@@ -1,57 +1,1152 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
-import ConfirmDialog from "../components/ConfirmDialog";
-import ImagePreview from "../components/ImagePreview";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
+import toast from "react-hot-toast";
+import {
+  User,
+  Briefcase,
+  GraduationCap,
+  Award,
+  FolderKanban,
+  Settings,
+  LogOut,
+  Save,
+  Menu,
+  X,
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Upload,
+  Eye,
+  EyeOff,
+  Palette,
+  Code2,
+} from "lucide-react";
 
+import { Button, Input, Textarea, Modal, Badge } from "@/components/ui";
+import { GradientText, SpotlightCard } from "@/components/effects";
+import { cn, generateId } from "@/utils/helpers";
+
+// Sidebar Navigation Items
+const navItems = [
+  { id: "theme", label: "Theme", icon: Palette },
+  { id: "profile", label: "Profile", icon: User },
+  { id: "skills", label: "Skills", icon: Code2 },
+  { id: "experience", label: "Experience", icon: Briefcase },
+  { id: "projects", label: "Projects", icon: FolderKanban },
+  { id: "education", label: "Education", icon: GraduationCap },
+  { id: "achievements", label: "Achievements", icon: Award },
+  { id: "settings", label: "Site Settings", icon: Settings },
+];
+
+// Image Upload Component
+// Image Upload Component
+const ImageUploader = ({
+  value,
+  onChange,
+  onFileSelect,
+  label,
+  className,
+  onPreview,
+}) => {
+  const [preview, setPreview] = useState(value);
+  // Stable ID for the input
+  const [uniqueId] = useState(
+    () => `file-upload-${Math.random().toString(36).substr(2, 9)}`,
+  );
+
+  useEffect(() => {
+    setPreview(value);
+  }, [value]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Create local preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+
+    // Notify parent to queue upload
+    if (onFileSelect) {
+      onFileSelect(file, objectUrl);
+    }
+
+    // Update parent value with local URL (for preview)
+    onChange(objectUrl);
+  };
+
+  return (
+    <div className={cn("space-y-2", className)}>
+      {label && (
+        <label className="block text-sm font-medium text-text-secondary">
+          {label}
+        </label>
+      )}
+      <div className="flex items-center gap-4">
+        <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-surface border border-border group">
+          {preview ? (
+            <img
+              src={preview}
+              alt="Preview"
+              className={cn(
+                "w-full h-full object-cover",
+                onPreview && "cursor-pointer hover:opacity-80 transition",
+              )}
+              onClick={() => onPreview && onPreview(preview)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-text-muted">
+              <Upload size={24} />
+            </div>
+          )}
+        </div>
+        <div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="sr-only" // Use sr-only for better accessibility/behavior than hidden
+            id={uniqueId}
+          />
+          <label htmlFor={uniqueId} className="cursor-pointer inline-block">
+            <Button
+              variant="outline"
+              size="sm"
+              as="span"
+              className="pointer-events-none" // Prevent button from capturing click, let label handle it
+            >
+              {value ? "Change" : "Upload"}
+            </Button>
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Section Card Component
+const SectionCard = ({ title, children, actions }) => (
+  <SpotlightCard className="glass p-6 mb-6">
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="text-lg font-bold">{title}</h3>
+      {actions && <div className="flex gap-2">{actions}</div>}
+    </div>
+    {children}
+  </SpotlightCard>
+);
+
+// EntryCard with Visibility Toggle
+const EntryCard = ({
+  children,
+  onDelete,
+  onToggle,
+  enabled = true,
+  className,
+}) => (
+  <div
+    className={cn(
+      "bg-surface/50 rounded-xl p-4 border border-border relative group transition-all duration-300",
+      !enabled && "opacity-60 grayscale-[0.5]",
+      className,
+    )}
+  >
+    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      {onToggle && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          className={cn(
+            "p-1.5 rounded-lg transition-colors",
+            enabled
+              ? "bg-surface text-text-secondary hover:text-primary hover:bg-surface-elevated"
+              : "bg-surface text-text-muted hover:text-text-secondary hover:bg-surface-elevated",
+          )}
+          title={enabled ? "Hide" : "Show"}
+        >
+          {enabled ? <Eye size={16} /> : <EyeOff size={16} />}
+        </button>
+      )}
+      <button
+        onClick={onDelete}
+        className="p-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-colors"
+        title="Delete"
+      >
+        <Trash2 size={16} />
+      </button>
+    </div>
+    {children}
+  </div>
+);
+
+// Theme Tab
+const ThemeTab = ({ data, onChange }) => {
+  if (!data) return null;
+
+  const handleChange = (key, value) => {
+    onChange({ ...data, [key]: value });
+    // Live preview
+    document.documentElement.style.setProperty(`--color-${key}`, value);
+  };
+
+  const colors = [
+    { key: "primary", label: "Primary Background" },
+    { key: "secondary", label: "Secondary Background" },
+    { key: "accent", label: "Primary Accent" },
+    { key: "accent-secondary", label: "Secondary Accent (Teal)" },
+    { key: "accent-tertiary", label: "Tertiary Accent (Pink)" },
+    { key: "text-primary", label: "Primary Text" },
+    { key: "text-secondary", label: "Secondary Text" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <SectionCard title="Site Theme">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {colors.map(({ key, label }) => (
+            <div key={key} className="flex items-center gap-4">
+              <input
+                type="color"
+                value={data[key] || "#000000"}
+                onChange={(e) => handleChange(key, e.target.value)}
+                className="w-12 h-12 rounded-lg cursor-pointer border-0 p-0 bg-transparent"
+              />
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-text-primary mb-1">
+                  {label}
+                </label>
+                <Input
+                  value={data[key] || ""}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                  placeholder="#000000"
+                  className="mt-0"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+      <div className="bg-surface/50 p-4 rounded-xl border border-border text-sm text-text-secondary">
+        <p>Tip: Changes are previewed live but must be SAVED to persist.</p>
+      </div>
+    </div>
+  );
+};
+const ProfileTab = ({ data, onChange, onPreview }) => {
+  if (!data) return null;
+
+  const handleChange = (field, value) => {
+    onChange({ ...data, [field]: value });
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionCard title="Profile Image">
+        <ImageUploader
+          value={data.avatar}
+          onChange={(url) => handleChange("avatar", url)}
+          onFileSelect={onPreview} // passing onFileSelect logic via props
+          onPreview={
+            onPreview && typeof onPreview === "function" ? onPreview : undefined
+          }
+          label="Avatar"
+        />
+      </SectionCard>
+
+      <SectionCard title="Personal Information">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Full Name"
+            value={data.name || ""}
+            onChange={(e) => handleChange("name", e.target.value)}
+          />
+          <Input
+            label="Title"
+            value={data.title || ""}
+            onChange={(e) => handleChange("title", e.target.value)}
+            placeholder="e.g., Full Stack Developer"
+          />
+          <Input
+            label="Email"
+            type="email"
+            value={data.email || ""}
+            onChange={(e) => handleChange("email", e.target.value)}
+          />
+          <Input
+            label="Location"
+            value={data.location || ""}
+            onChange={(e) => handleChange("location", e.target.value)}
+          />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Professional Summary">
+        <Textarea
+          value={data.summary || ""}
+          onChange={(e) => handleChange("summary", e.target.value)}
+          rows={4}
+          maxLength={500}
+          placeholder="Write a compelling summary about yourself..."
+        />
+      </SectionCard>
+
+      <SectionCard title="Social Links">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="GitHub"
+            value={data.github || ""}
+            onChange={(e) => handleChange("github", e.target.value)}
+            placeholder="https://github.com/username"
+          />
+          <Input
+            label="LinkedIn"
+            value={data.linkedin || ""}
+            onChange={(e) => handleChange("linkedin", e.target.value)}
+            placeholder="https://linkedin.com/in/username"
+          />
+          <Input
+            label="Twitter"
+            value={data.twitter || ""}
+            onChange={(e) => handleChange("twitter", e.target.value)}
+            placeholder="https://twitter.com/username"
+          />
+          <Input
+            label="Website"
+            value={data.website || ""}
+            onChange={(e) => handleChange("website", e.target.value)}
+            placeholder="https://yourwebsite.com"
+          />
+        </div>
+      </SectionCard>
+    </div>
+  );
+};
+
+// Skills Tab
+const SkillsTab = ({ data, onChange }) => {
+  const [newSkill, setNewSkill] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+
+  const addSkill = (category) => {
+    if (!newSkill.trim()) return;
+    const updated = { ...data };
+    if (!updated[category]) updated[category] = [];
+    // Store as object { name, enabled }
+    updated[category] = [
+      ...updated[category],
+      { name: newSkill.trim(), enabled: true },
+    ];
+    onChange(updated);
+    setNewSkill("");
+  };
+
+  const removeSkill = (category, index) => {
+    const updated = { ...data };
+    updated[category] = updated[category].filter((_, i) => i !== index);
+    if (updated[category].length === 0) delete updated[category];
+    onChange(updated);
+  };
+
+  const toggleSkill = (category, index) => {
+    const updated = { ...data };
+    const skill = updated[category][index];
+    // Handle both legacy strings and new objects
+    if (typeof skill === "string") {
+      updated[category][index] = { name: skill, enabled: false };
+    } else {
+      updated[category][index] = { ...skill, enabled: !skill.enabled };
+    }
+    onChange(updated);
+  };
+
+  const addCategory = () => {
+    if (!newCategory.trim()) return;
+    const categoryKey = newCategory.toLowerCase().trim();
+    if (data[categoryKey]) {
+      toast.error("Category already exists");
+      return;
+    }
+    onChange({ ...data, [categoryKey]: [] });
+    setNewCategory("");
+    toast.success("Category added");
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Add Category */}
+      <SectionCard title="Add Category">
+        <div className="flex gap-3">
+          <Input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="e.g., Tools, Languages..."
+            className="flex-1"
+            onKeyDown={(e) => e.key === "Enter" && addCategory()}
+          />
+          <Button onClick={addCategory}>
+            <Plus size={18} />
+            Add
+          </Button>
+        </div>
+      </SectionCard>
+
+      {/* Skill Categories */}
+      {Object.entries(data || {}).map(([category, skills]) => (
+        <SectionCard
+          key={category}
+          title={<span className="capitalize">{category} Skills</span>}
+        >
+          {/* Current Skills */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {skills.map((skillItem, index) => {
+              const name =
+                typeof skillItem === "string" ? skillItem : skillItem.name;
+              const enabled =
+                typeof skillItem === "string" ? true : skillItem.enabled;
+
+              return (
+                <Badge
+                  key={index}
+                  variant={enabled ? "accent" : "outline"}
+                  className={cn(
+                    "flex items-center gap-2 pr-2 transition-all",
+                    !enabled && "opacity-60 bg-surface border-dashed",
+                  )}
+                >
+                  {name}
+                  <div className="flex items-center gap-1 ml-1 border-l border-white/10 pl-2">
+                    <button
+                      onClick={() => toggleSkill(category, index)}
+                      className={cn(
+                        "hover:bg-white/10 rounded p-0.5 transition-colors",
+                        enabled ? "text-white/70" : "text-text-muted",
+                      )}
+                      title={enabled ? "Disable" : "Enable"}
+                    >
+                      {enabled ? <Eye size={12} /> : <EyeOff size={12} />}
+                    </button>
+                    <button
+                      onClick={() => removeSkill(category, index)}
+                      className="text-error/70 hover:text-error hover:bg-error/10 rounded p-0.5 transition-colors"
+                      title="Remove"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                </Badge>
+              );
+            })}
+            {skills.length === 0 && (
+              <p className="text-text-muted text-sm">No skills added yet</p>
+            )}
+          </div>
+
+          {/* Add Skill */}
+          <div className="flex gap-3">
+            <Input
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              placeholder={`Add ${category} skill...`}
+              className="flex-1"
+              onKeyDown={(e) => e.key === "Enter" && addSkill(category)}
+            />
+            <Button variant="outline" onClick={() => addSkill(category)}>
+              <Plus size={18} />
+            </Button>
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  );
+};
+
+// Experience Tab
+const ExperienceTab = ({ data, onChange }) => {
+  const addEntry = () => {
+    onChange([
+      ...(data || []),
+      {
+        id: generateId(),
+        role: "",
+        company: "",
+        location: "",
+        period: "",
+        description: "",
+        technologies: "",
+      },
+    ]);
+  };
+
+  const updateEntry = (index, field, value) => {
+    const updated = [...data];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  const removeEntry = (index) => {
+    onChange(data.filter((_, i) => i !== index));
+  };
+
+  const toggleEntry = (index) => {
+    const updated = [...data];
+    updated[index] = {
+      ...updated[index],
+      enabled: updated[index].enabled === false ? true : false,
+    };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={addEntry}>
+          <Plus size={18} />
+          Add Experience
+        </Button>
+      </div>
+
+      {(data || []).map((exp, index) => (
+        <EntryCard
+          key={exp.id || index}
+          onDelete={() => removeEntry(index)}
+          onToggle={() => toggleEntry(index)}
+          enabled={exp.enabled !== false}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Role/Title"
+              value={exp.role}
+              onChange={(e) => updateEntry(index, "role", e.target.value)}
+            />
+            <Input
+              label="Company"
+              value={exp.company}
+              onChange={(e) => updateEntry(index, "company", e.target.value)}
+            />
+            <Input
+              label="Location"
+              value={exp.location}
+              onChange={(e) => updateEntry(index, "location", e.target.value)}
+            />
+            <Input
+              label="Period"
+              value={exp.period}
+              onChange={(e) => updateEntry(index, "period", e.target.value)}
+              placeholder="e.g., Jan 2022 - Present"
+            />
+          </div>
+          <div className="mt-4">
+            <Textarea
+              label="Description"
+              value={exp.description}
+              onChange={(e) =>
+                updateEntry(index, "description", e.target.value)
+              }
+              placeholder="Description (separate points with new lines)"
+              rows={5}
+            />
+          </div>
+          <div className="mt-4">
+            <Input
+              label="Technologies (comma separated)"
+              value={exp.technologies}
+              onChange={(e) =>
+                updateEntry(index, "technologies", e.target.value)
+              }
+              placeholder="React, Node.js, MongoDB..."
+            />
+          </div>
+        </EntryCard>
+      ))}
+
+      {(!data || data.length === 0) && (
+        <div className="text-center py-12 text-text-muted">
+          <Briefcase size={48} className="mx-auto mb-4 opacity-50" />
+          <p>No experience entries yet</p>
+          <Button variant="outline" className="mt-4" onClick={addEntry}>
+            Add Your First Experience
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Projects Tab
+const ProjectsTab = ({ data, onChange, onPreview, onFileSelect }) => {
+  const addEntry = () => {
+    onChange([
+      ...(data || []),
+      {
+        id: generateId(),
+        name: "",
+        description: "",
+        technologies: "",
+        images: [],
+        demoUrl: "",
+        github: "",
+      },
+    ]);
+  };
+
+  const updateEntry = (index, field, value) => {
+    const updated = [...data];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  const removeEntry = (index) => {
+    onChange(data.filter((_, i) => i !== index));
+  };
+
+  const addImage = (index, files) => {
+    // Handle both single file and FileList/Array
+    const fileList = files instanceof FileList ? Array.from(files) : [files];
+    const objectUrls = fileList.map((file) => URL.createObjectURL(file));
+
+    const updated = [...data];
+    updated[index].images = [...(updated[index].images || []), ...objectUrls];
+    onChange(updated);
+
+    if (onFileSelect) {
+      fileList.forEach((file, i) => {
+        onFileSelect(file, objectUrls[i]);
+      });
+    }
+  };
+
+  const removeImage = (projectIndex, imageIndex) => {
+    const updated = [...data];
+    updated[projectIndex].images = updated[projectIndex].images.filter(
+      (_, i) => i !== imageIndex,
+    );
+    onChange(updated);
+  };
+
+  const handleMoveImage = (projectIndex, imageIndex, direction) => {
+    const project = data[projectIndex];
+    const images = [...(project.images || [])];
+
+    if (direction === "left" && imageIndex > 0) {
+      [images[imageIndex], images[imageIndex - 1]] = [
+        images[imageIndex - 1],
+        images[imageIndex],
+      ];
+    } else if (direction === "right" && imageIndex < images.length - 1) {
+      [images[imageIndex], images[imageIndex + 1]] = [
+        images[imageIndex + 1],
+        images[imageIndex],
+      ];
+    }
+
+    updateEntry(projectIndex, "images", images);
+  };
+
+  const toggleEntry = (index) => {
+    const updated = [...data];
+    updated[index] = {
+      ...updated[index],
+      enabled: updated[index].enabled === false ? true : false,
+    };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={addEntry}>
+          <Plus size={18} />
+          Add Project
+        </Button>
+      </div>
+
+      {(data || []).map((project, index) => (
+        <EntryCard
+          key={project.id || index}
+          onDelete={() => removeEntry(index)}
+          onToggle={() => toggleEntry(index)}
+          enabled={project.enabled !== false}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Project Name"
+              value={project.name}
+              onChange={(e) => updateEntry(index, "name", e.target.value)}
+            />
+            <Input
+              label="Technologies"
+              value={project.technologies}
+              onChange={(e) =>
+                updateEntry(index, "technologies", e.target.value)
+              }
+              placeholder="React, Firebase..."
+            />
+            <Input
+              label="Live URL"
+              value={project.demoUrl}
+              onChange={(e) => updateEntry(index, "demoUrl", e.target.value)}
+            />
+            <Input
+              label="GitHub URL"
+              value={project.github}
+              onChange={(e) => updateEntry(index, "github", e.target.value)}
+            />
+          </div>
+          <div className="mt-4">
+            <Textarea
+              label="Description"
+              value={project.description}
+              onChange={(e) =>
+                updateEntry(index, "description", e.target.value)
+              }
+              rows={3}
+            />
+          </div>
+
+          {/* Project Images */}
+          <label className="block text-sm font-medium text-text-secondary mb-3">
+            Project Images
+          </label>
+          <div className="w-full max-w-[85vw] md:max-w-full">
+            <div className="flex bg-black/20 p-3 rounded-xl overflow-x-auto gap-3 pb-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent w-full">
+              {(project.images || []).map((img, imgIndex) => (
+                <div
+                  key={img}
+                  className="relative group shrink-0 w-32 h-32 md:w-36 md:h-36"
+                >
+                  <div
+                    className="relative w-full h-full rounded-lg overflow-hidden border border-white/10 bg-black/40 cursor-pointer"
+                    onClick={() => onPreview && onPreview(img)}
+                  >
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                    />
+
+                    {/* Controls Overlay - Glassmorphic Bottom Bar */}
+                    <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="flex items-center justify-between gap-1 bg-black/60 backdrop-blur-md rounded-lg p-1 border border-white/10">
+                        {/* Move Left */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveImage(index, imgIndex, "left");
+                          }}
+                          disabled={imgIndex === 0}
+                          className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-20 transition-colors"
+                          title="Move Left"
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(index, imgIndex);
+                          }}
+                          className="p-1.5 rounded-md text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-colors"
+                          title="Remove"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+
+                        {/* Move Right */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveImage(index, imgIndex, "right");
+                          }}
+                          disabled={
+                            imgIndex === (project.images?.length || 0) - 1
+                          }
+                          className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-20 transition-colors"
+                          title="Move Right"
+                        >
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Index Badge */}
+                  <div className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-surface-elevated border border-border text-[9px] font-bold flex items-center justify-center text-text-secondary shadow-sm z-20">
+                    {imgIndex + 1}
+                  </div>
+                </div>
+              ))}
+
+              {/* Modern Add Button */}
+              <label className="w-32 h-32 md:w-36 md:h-36 relative group cursor-pointer shrink-0">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) =>
+                    e.target.files?.length && addImage(index, e.target.files)
+                  }
+                />
+                <div className="absolute inset-0 rounded-lg border-2 border-dashed border-white/10 bg-white/[0.02] group-hover:bg-white/[0.05] group-hover:border-accent/40 transition-all duration-300 flex flex-col items-center justify-center gap-2 text-text-muted group-hover:text-accent">
+                  <div className="p-2 rounded-full bg-white/5 group-hover:bg-accent/10 transition-colors">
+                    <Plus size={20} />
+                  </div>
+                  <span className="text-[10px] uppercase tracking-wider font-medium">
+                    Add Image
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </EntryCard>
+      ))}
+
+      {(!data || data.length === 0) && (
+        <div className="text-center py-12 text-text-muted">
+          <FolderKanban size={48} className="mx-auto mb-4 opacity-50" />
+          <p>No projects yet</p>
+          <Button variant="outline" className="mt-4" onClick={addEntry}>
+            Add Your First Project
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Education Tab
+const EducationTab = ({ data, onChange, onPreview, onFileSelect }) => {
+  const addEntry = () => {
+    onChange([
+      ...(data || []),
+      {
+        id: generateId(),
+        degree: "",
+        institution: "",
+        period: "",
+        description: "",
+        logo: "",
+      },
+    ]);
+  };
+
+  const updateEntry = (index, field, value) => {
+    const updated = [...data];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  const removeEntry = (index) => {
+    onChange(data.filter((_, i) => i !== index));
+  };
+
+  const toggleEntry = (index) => {
+    const updated = [...data];
+    updated[index] = {
+      ...updated[index],
+      enabled: updated[index].enabled === false ? true : false,
+    };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={addEntry}>
+          <Plus size={18} />
+          Add Education
+        </Button>
+      </div>
+
+      {(data || []).map((edu, index) => (
+        <EntryCard
+          key={edu.id || index}
+          onDelete={() => removeEntry(index)}
+          onToggle={() => toggleEntry(index)}
+          enabled={edu.enabled !== false}
+        >
+          <div className="flex gap-4 mb-4">
+            <ImageUploader
+              value={edu.logo}
+              onChange={(url) => updateEntry(index, "logo", url)}
+              onFileSelect={onFileSelect}
+              onPreview={onPreview}
+              label="Logo"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Degree"
+              value={edu.degree}
+              onChange={(e) => updateEntry(index, "degree", e.target.value)}
+            />
+            <Input
+              label="Institution"
+              value={edu.institution}
+              onChange={(e) =>
+                updateEntry(index, "institution", e.target.value)
+              }
+            />
+            <Input
+              label="Period"
+              value={edu.period}
+              onChange={(e) => updateEntry(index, "period", e.target.value)}
+              placeholder="e.g., 2018 - 2022"
+            />
+          </div>
+          <div className="mt-4">
+            <Textarea
+              label="Description (optional)"
+              value={edu.description}
+              onChange={(e) =>
+                updateEntry(index, "description", e.target.value)
+              }
+              placeholder="Description (separate points with new lines)"
+              rows={4}
+            />
+          </div>
+        </EntryCard>
+      ))}
+
+      {(!data || data.length === 0) && (
+        <div className="text-center py-12 text-text-muted">
+          <GraduationCap size={48} className="mx-auto mb-4 opacity-50" />
+          <p>No education entries yet</p>
+          <Button variant="outline" className="mt-4" onClick={addEntry}>
+            Add Your Education
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Achievements Tab
+const AchievementsTab = ({ data, onChange, onPreview, onFileSelect }) => {
+  const addEntry = () => {
+    onChange([
+      ...(data || []),
+      {
+        id: generateId(),
+        name: "",
+        issuer: "",
+        date: "",
+        description: "",
+        image: "",
+        link: "",
+      },
+    ]);
+  };
+
+  const updateEntry = (index, field, value) => {
+    const updated = [...data];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  const removeEntry = (index) => {
+    onChange(data.filter((_, i) => i !== index));
+  };
+
+  const toggleEntry = (index) => {
+    const updated = [...data];
+    updated[index] = {
+      ...updated[index],
+      enabled: updated[index].enabled === false ? true : false,
+    };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={addEntry}>
+          <Plus size={18} />
+          Add Achievement
+        </Button>
+      </div>
+
+      {(data || []).map((achievement, index) => (
+        <EntryCard
+          key={achievement.id || index}
+          onDelete={() => removeEntry(index)}
+          onToggle={() => toggleEntry(index)}
+          enabled={achievement.enabled !== false}
+        >
+          <div className="flex gap-4 mb-4">
+            <ImageUploader
+              value={achievement.image}
+              onChange={(url) => updateEntry(index, "image", url)}
+              onFileSelect={onFileSelect}
+              onPreview={onPreview}
+              label="Certificate Image"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Title"
+              value={achievement.name}
+              onChange={(e) => updateEntry(index, "name", e.target.value)}
+            />
+            <Input
+              label="Issuer"
+              value={achievement.issuer}
+              onChange={(e) => updateEntry(index, "issuer", e.target.value)}
+            />
+            <Input
+              label="Date"
+              value={achievement.date}
+              onChange={(e) => updateEntry(index, "date", e.target.value)}
+              placeholder="e.g., January 2023"
+            />
+            <Input
+              label="Certificate Link"
+              value={achievement.link || ""}
+              onChange={(e) => updateEntry(index, "link", e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+          <div className="mt-4">
+            <Textarea
+              label="Description (optional)"
+              value={achievement.description}
+              onChange={(e) =>
+                updateEntry(index, "description", e.target.value)
+              }
+              placeholder="Description (separate points with new lines)"
+              rows={4}
+            />
+          </div>
+        </EntryCard>
+      ))}
+
+      {(!data || data.length === 0) && (
+        <div className="text-center py-12 text-text-muted">
+          <Award size={48} className="mx-auto mb-4 opacity-50" />
+          <p>No achievements yet</p>
+          <Button variant="outline" className="mt-4" onClick={addEntry}>
+            Add Your First Achievement
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Settings Tab (Section Visibility)
+const SettingsTab = ({ data, onChange }) => {
+  const sections = [
+    { id: "hero", label: "Hero Section" },
+    { id: "skills", label: "Skills Section" },
+    { id: "experience", label: "Experience Section" },
+    { id: "projects", label: "Projects Section" },
+    { id: "education", label: "Education Section" },
+    { id: "achievements", label: "Achievements Section" },
+    { id: "contact", label: "Contact Section" },
+  ];
+
+  const handleToggle = (sectionId) => {
+    const currentSettings = data.sections || {};
+    onChange({
+      ...data,
+      sections: {
+        ...currentSettings,
+        [sectionId]: currentSettings[sectionId] === false ? true : false,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionCard title="Section Visibility">
+        <p className="text-text-secondary mb-4">
+          Toggle which sections are visible on your portfolio.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {sections.map(({ id, label }) => {
+            const isVisible = data?.sections?.[id] !== false;
+            return (
+              <div
+                key={id}
+                className={cn(
+                  "flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
+                  isVisible
+                    ? "bg-surface border-white/10"
+                    : "bg-surface/30 border-white/5 opacity-60",
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "w-2 h-2 rounded-full",
+                      isVisible ? "bg-accent-secondary" : "bg-text-muted",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "font-medium",
+                      isVisible ? "text-text-primary" : "text-text-secondary",
+                    )}
+                  >
+                    {label}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleToggle(id)}
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    isVisible
+                      ? "bg-accent/10 text-accent hover:bg-accent/20"
+                      : "bg-black/20 text-text-muted hover:bg-black/30",
+                  )}
+                >
+                  {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </SectionCard>
+    </div>
+  );
+};
+
+// Main Admin Component
 const Admin = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("profile");
   const [saving, setSaving] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState({
-    isOpen: false,
-    onConfirm: null,
-    title: "",
-    message: "",
-  });
-  const [stagedImages, setStagedImages] = useState({
-    profile: null, // { file: File, preview: string, oldUrl: string }
-    achievements: {}, // { achievementId: { file, preview } }
-    projects: {}, // { imageId: { file, preview, projectIndex } }
-    education: {},
-  });
+  const [activeTab, setActiveTab] = useState("profile");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
   const navigate = useNavigate();
-
-  // Helper function to get full URL for assets
-  const getAssetUrl = (url) => {
-    if (!url) return "https://via.placeholder.com/150";
-
-    // If it's already a full URL, return as is
-    if (url.startsWith("http")) {
-      return url;
-    }
-
-    // If it's a relative path, the proxy will handle it
-    return url;
-  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/api/portfolio");
-        setData(res.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          // Token expired or invalid
-          localStorage.removeItem("token");
-          delete axios.defaults.headers.common["Authorization"];
+        const token = localStorage.getItem("token");
+        if (!token) {
           navigate("/login");
+          return;
         }
+
+        // Set default header
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        const response = await axios.get("/api/portfolio");
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        if (error.response?.status === 401) {
+          handleLogout();
+        }
+      } finally {
         setLoading(false);
       }
     };
@@ -65,1742 +1160,381 @@ const Admin = () => {
     navigate("/login");
   };
 
-  const handleChange = (section, field, value) => {
-    setData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
+  // Create a ref to store pending uploads (blob URL -> File)
+  const pendingUploads = useRef(new Map());
+
+  // Handle file selection (queueing uploads)
+  const handleFileSelect = (file, blobUrl) => {
+    pendingUploads.current.set(blobUrl, file);
+    setIsDirty(true);
+  };
+
+  // Allow clearing pending uploads when data is refreshed or component unmounts
+  useEffect(() => {
+    return () => {
+      pendingUploads.current.clear();
+    };
+  }, []);
+
+  const processUploads = async (obj) => {
+    // If string is a blob URL, upload it
+    if (typeof obj === "string" && obj.startsWith("blob:")) {
+      if (pendingUploads.current.has(obj)) {
+        const file = pendingUploads.current.get(obj);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const response = await axios.post("/api/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          return response.data.url;
+        } catch (error) {
+          console.error("Upload failed for", obj, error);
+          toast.error("One or more images failed to upload");
+          return obj; // Return original on failure
+        }
+      }
+    }
+
+    // Recursively process arrays
+    if (Array.isArray(obj)) {
+      return Promise.all(obj.map(processUploads));
+    }
+
+    // Recursively process objects
+    if (typeof obj === "object" && obj !== null) {
+      const newObj = {};
+      for (const key in obj) {
+        newObj[key] = await processUploads(obj[key]);
+      }
+      return newObj;
+    }
+
+    return obj;
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Upload all staged images first
-      const uploadPromises = [];
+      // Process any pending uploads
+      const processedData = await processUploads(data);
 
-      // Upload profile image if staged
-      if (stagedImages.profile) {
-        uploadPromises.push(
-          handleFileUpload(stagedImages.profile.file).then(async (url) => {
-            // Delete old image from Cloudinary
-            if (
-              stagedImages.profile.oldUrl &&
-              stagedImages.profile.oldUrl.startsWith("http")
-            ) {
-              await deleteCloudinaryImage(stagedImages.profile.oldUrl);
-            }
-            return { type: "profile", url };
-          })
-        );
-      }
-
-      // Upload achievement images if staged
-      Object.entries(stagedImages.achievements).forEach(([id, imageData]) => {
-        if (imageData.file) {
-          uploadPromises.push(
-            handleFileUpload(imageData.file).then(async (url) => {
-              if (imageData.oldUrl && imageData.oldUrl.startsWith("http")) {
-                await deleteCloudinaryImage(imageData.oldUrl);
-              }
-              return { type: "achievement", id, url };
-            })
-          );
-        }
-      });
-
-      // Upload project images if staged
-      Object.entries(stagedImages.projects).forEach(([imageId, imageData]) => {
-        if (imageData.file) {
-          uploadPromises.push(
-            handleFileUpload(imageData.file).then((url) => {
-              return {
-                type: "project",
-                projectIndex: imageData.projectIndex,
-                preview: imageData.preview,
-                url,
-              };
-            })
-          );
-        }
-      });
-
-      // Upload education logos if staged
-      Object.entries(stagedImages.education).forEach(([id, imageData]) => {
-        if (imageData.file) {
-          uploadPromises.push(
-            handleFileUpload(imageData.file).then(async (url) => {
-              if (imageData.oldUrl && imageData.oldUrl.startsWith("http")) {
-                await deleteCloudinaryImage(imageData.oldUrl);
-              }
-              return { type: "education", id, url };
-            })
-          );
-        }
-      });
-
-      // Wait for all uploads
-      const uploadResults = await Promise.all(uploadPromises);
-
-      // Update data with new URLs
-      const updatedData = { ...data };
-      uploadResults.forEach(({ type, url, id, projectIndex, preview }) => {
-        if (type === "profile") {
-          updatedData.profile.avatar = url;
-        } else if (type === "achievement") {
-          const achievement = updatedData.achievements.find((a) => a.id === id);
-          if (achievement) {
-            achievement.image = url;
-          }
-        } else if (type === "education") {
-          const edu = updatedData.education.find((e) => e.id === id);
-          if (edu) {
-            edu.logo = url;
-          }
-        } else if (type === "project") {
-          // Replace blob preview URL with real Cloudinary URL
-          const project = updatedData.projects[projectIndex];
-          if (project && project.images) {
-            const blobIndex = project.images.findIndex(
-              (img) => img === preview
-            );
-            if (blobIndex !== -1) {
-              project.images[blobIndex] = url;
-            }
-          }
-        }
-      });
-      // Save to GitHub
-      await axios.post("/api/portfolio", updatedData, {
+      await axios.post("/api/portfolio", processedData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      // Update local state
-      setData(updatedData);
+      // Update local state with processed URLs (no more blob URLs)
+      setData(processedData);
+      pendingUploads.current.clear();
 
-      // Clear staged images
-      setStagedImages({
-        profile: null,
-        achievements: {},
-        projects: {},
-        education: {},
-      });
-
-      toast.success("Saved successfully!", {
-        duration: 3000,
-        icon: "✅",
-      });
-    } catch (err) {
-      console.error("Save failed:", err);
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        toast.error("Session expired. Please login again.");
+      toast.success("Changes saved successfully!");
+      setIsDirty(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save changes");
+      if (error.response?.status === 401) {
         handleLogout();
-      } else {
-        toast.error("Error saving data");
       }
     } finally {
       setSaving(false);
     }
   };
 
-  // Upload file to Cloudinary (returns promise)
-  const handleFileUpload = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await axios.post("/api/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return res.data.url;
+  const updateData = (section, value) => {
+    setData((prev) => ({ ...prev, [section]: value }));
+    setIsDirty(true);
   };
 
-  // Delete image from Cloudinary
-  const deleteCloudinaryImage = async (url) => {
-    try {
-      await axios.delete("/api/upload", {
-        data: { url },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-    } catch (err) {
-      console.error("Failed to delete image:", err);
-      // Don't throw error, just log it
+  const handleTabChange = (newTab) => {
+    if (activeTab === newTab) return;
+
+    if (isDirty) {
+      if (
+        !window.confirm(
+          "You have unsaved changes. Are you sure you want to switch tabs without saving?",
+        )
+      ) {
+        return;
+      }
     }
-  };
 
-  // Stage image for upload (preview only)
-  const stageProfileImage = (file) => {
-    const preview = URL.createObjectURL(file);
-    setStagedImages((prev) => ({
-      ...prev,
-      profile: {
-        file,
-        preview,
-        oldUrl: data.profile.avatar,
-      },
-    }));
-    // Update data with preview URL for immediate display
-    handleChange("profile", "avatar", preview);
-  };
-
-  // Remove staged profile image
-  const removeStagedProfileImage = () => {
-    if (stagedImages.profile) {
-      URL.revokeObjectURL(stagedImages.profile.preview);
-      setStagedImages((prev) => ({
-        ...prev,
-        profile: null,
-      }));
-      // Restore old URL
-      handleChange("profile", "avatar", stagedImages.profile.oldUrl);
-    }
+    setActiveTab(newTab);
+    setSidebarOpen(false);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-primary text-white flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-accent-secondary/20 border-t-accent-secondary rounded-full animate-spin" />
       </div>
     );
   }
 
+  const renderTab = () => {
+    const commonProps = {
+      onPreview: setPreviewImage,
+      onFileSelect: handleFileSelect,
+    };
+
+    switch (activeTab) {
+      case "theme":
+        return (
+          <ThemeTab
+            data={data?.theme || {}}
+            onChange={(v) => updateData("theme", v)}
+          />
+        );
+      case "profile":
+        return (
+          <ProfileTab
+            data={data?.profile}
+            onChange={(v) => updateData("profile", v)}
+            {...commonProps}
+          />
+        );
+      case "skills":
+        return (
+          <SkillsTab
+            data={data?.skills}
+            onChange={(v) => updateData("skills", v)}
+            {...commonProps}
+          />
+        );
+      case "experience":
+        return (
+          <ExperienceTab
+            data={data?.experience}
+            onChange={(v) => updateData("experience", v)}
+            {...commonProps}
+          />
+        );
+      case "projects":
+        return (
+          <ProjectsTab
+            data={data?.projects}
+            onChange={(v) => updateData("projects", v)}
+            {...commonProps}
+          />
+        );
+      case "education":
+        return (
+          <EducationTab
+            data={data?.education}
+            onChange={(v) => updateData("education", v)}
+            {...commonProps}
+          />
+        );
+      case "achievements":
+        return (
+          <AchievementsTab
+            data={data?.achievements}
+            onChange={(v) => updateData("achievements", v)}
+            {...commonProps}
+          />
+        );
+      case "settings":
+        return (
+          <SettingsTab
+            data={data?.settings || {}}
+            onChange={(v) => updateData("settings", v)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-primary text-white">
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#1e293b",
-            color: "#fff",
-            border: "1px solid #38bdf8",
-          },
-          success: {
-            iconTheme: {
-              primary: "#38bdf8",
-              secondary: "#fff",
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: "#ef4444",
-              secondary: "#fff",
-            },
-          },
-        }}
-      />
-      <ConfirmDialog
-        isOpen={confirmDialog.isOpen}
-        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-        onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title}
-        message={confirmDialog.message}
-      />
+    <div className="min-h-screen bg-primary">
       {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-50 bg-secondary p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-50 glass border-b border-border">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg bg-primary hover:bg-gray-700 transition-colors"
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-lg hover:bg-surface transition"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu size={24} />
             </button>
-            <div>
-              <h1 className="text-lg font-bold">Admin Dashboard</h1>
-              <p className="text-xs text-gray-400">Manage your portfolio</p>
-            </div>
+            <h1 className="font-bold font-heading">
+              <GradientText>Admin</GradientText>
+            </h1>
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
+              size="sm"
+              variant="success"
               onClick={handleSave}
-              disabled={saving}
-              className="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              loading={saving}
+              disabled={!isDirty}
             >
-              {saving ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span className="hidden sm:inline">Saving...</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="hidden sm:inline">Save</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-3 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 flex items-center gap-1"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+              <Save size={16} />
+            </Button>
+            <Button size="sm" variant="ghost" onClick={handleLogout}>
+              <LogOut size={16} />
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
 
       <div className="flex">
-        {/* Sidebar Navigation - Mobile & Desktop */}
-        <div
-          className={`
-          fixed lg:static inset-y-0 left-0 z-50
-          w-64 bg-secondary transform transition-transform duration-300 ease-in-out
-          ${
-            isSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
-        `}
+        {/* Sidebar Overlay (Mobile) */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/50 z-40"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Sidebar */}
+        <motion.aside
+          className={cn(
+            "fixed lg:sticky top-0 left-0 z-50 h-screen w-64 glass border-r border-border",
+            "transition-transform lg:translate-x-0",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          )}
         >
-          <div className="h-full flex flex-col">
-            {/* Mobile Sidebar Header */}
-            <div className="lg:hidden p-4 border-b border-gray-700 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-accent">Menu</h2>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-1 rounded hover:bg-gray-700"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            <h1 className="text-xl font-bold font-heading">
+              <GradientText from="text-secondary" to="accent-secondary">
+                Dashboard
+              </GradientText>
+            </h1>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-2 rounded-lg hover:bg-surface transition"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="p-4 space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabChange(item.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition",
+                    activeTab === item.id
+                      ? "bg-accent-secondary/20 text-accent-secondary"
+                      : "text-text-secondary hover:text-white hover:bg-surface",
+                  )}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+                  <Icon size={20} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
 
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="bg-secondary rounded-xl p-4 mb-6">
-                <h3 className="font-bold text-lg mb-4 text-accent">
-                  Navigation
-                </h3>
-                <div className="flex flex-col gap-2">
-                  {[
-                    { id: "profile", label: "Profile", icon: "👤" },
-                    { id: "skills", label: "Skills", icon: "💡" },
-                    { id: "experience", label: "Experience", icon: "💼" },
-                    { id: "projects", label: "Projects", icon: "🚀" },
-                    { id: "achievements", label: "Achievements", icon: "🏆" },
-                    { id: "education", label: "Education", icon: "🎓" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        setActiveTab(tab.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`text-left px-4 py-3 rounded-lg transition-all flex items-center ${
-                        activeTab === tab.id
-                          ? "bg-accent text-primary font-bold shadow-lg"
-                          : "bg-primary hover:bg-gray-700"
-                      }`}
-                    >
-                      <span className="mr-3 text-lg">{tab.icon}</span>
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="bg-secondary rounded-xl p-4">
-                <h3 className="font-bold text-lg mb-4 text-accent">
-                  Quick Stats
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">Skills:</span>
-                    <span className="font-bold">
-                      {data?.skills
-                        ? Object.values(data.skills).flat().length
-                        : 0}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">Experience:</span>
-                    <span className="font-bold">
-                      {data?.experience?.length || 0}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">Projects:</span>
-                    <span className="font-bold">
-                      {data?.projects?.length || 0}
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {/* Sidebar Footer */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+            <div className="flex gap-2">
+              <a href="/" target="_blank" className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Eye size={16} />
+                  Preview
+                </Button>
+              </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-error"
+              >
+                <LogOut size={16} />
+              </Button>
             </div>
           </div>
-        </div>
+        </motion.aside>
 
-        {/* Main Content Area */}
-        <div className="flex-1 min-h-screen">
+        {/* Main Content */}
+        <main className="flex-1 min-h-screen">
           {/* Desktop Header */}
-          <div className="hidden lg:block bg-primary p-8 pb-0">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                  <p className="text-gray-400 mt-2">
-                    Manage your portfolio content
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {saving ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Saving...
-                      </>
-                    ) : (
-                      "Save Changes"
-                    )}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
+          <header className="hidden lg:flex items-center justify-between py-4 px-8 border-b border-border sticky top-0 z-[500] bg-primary/80 backdrop-blur-md">
+            <div>
+              <h2 className="text-2xl font-bold capitalize">{activeTab}</h2>
+              <p className="text-text-secondary text-sm mt-1">
+                Manage your {activeTab} information
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <a href="/" target="_blank">
+                <Button variant="outline">
+                  <Eye size={18} />
+                  Preview Site
+                </Button>
+              </a>
+              <Button onClick={handleSave} loading={saving} disabled={!isDirty}>
+                <Save size={18} />
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </header>
+
+          {/* Content */}
+          <div className="p-6 lg:p-8">
+            <div className="max-w-4xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full min-w-0"
+                >
+                  {renderTab()}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
-
-          <div className="p-4 lg:p-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="bg-secondary p-4 lg:p-6 rounded-xl">
-                {/* Profile Tab */}
-                {activeTab === "profile" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold mb-6 text-accent">
-                      Profile Information
-                    </h2>
-
-                    {/* Profile Image Upload */}
-                    <div className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700">
-                      <h3 className="text-lg font-bold mb-4">Profile Image</h3>
-                      <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-6">
-                        <img
-                          src={getAssetUrl(data.profile.avatar)}
-                          alt="Profile"
-                          className="w-20 h-20 lg:w-24 lg:h-24 rounded-full object-cover border-2 border-accent shadow-lg"
-                        />
-                        <div className="flex-1 w-full">
-                          <label className="block text-sm text-gray-400 mb-2">
-                            Upload New Image
-                          </label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              if (!file) return;
-                              stageProfileImage(file);
-                              e.target.value = ""; // Reset input
-                            }}
-                            className="w-full text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
-                          />
-                          {stagedImages.profile && (
-                            <p className="text-yellow-500 text-sm mt-2 flex items-center gap-2">
-                              <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-                              Image staged - click Save to upload
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-2">
-                            Recommended: Square image, 400x400px or larger
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Profile Fields */}
-                    <div className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700">
-                      <h3 className="text-lg font-bold mb-4">
-                        Personal Information
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.keys(data.profile)
-                          .filter(
-                            (key) => key !== "avatar" && key !== "summary"
-                          )
-                          .map((key) => (
-                            <div key={key} className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400 capitalize">
-                                {key.replace(/([A-Z])/g, " $1").trim()}
-                              </label>
-                              <input
-                                type="text"
-                                value={data.profile[key]}
-                                onChange={(e) =>
-                                  handleChange("profile", key, e.target.value)
-                                }
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder={`Enter ${key
-                                  .replace(/([A-Z])/g, " $1")
-                                  .toLowerCase()}`}
-                              />
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-
-                    {/* Summary */}
-                    <div className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700">
-                      <h3 className="text-lg font-bold mb-4">
-                        Professional Summary
-                      </h3>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-400">
-                          Summary
-                        </label>
-                        <textarea
-                          value={data.profile.summary}
-                          onChange={(e) =>
-                            handleChange("profile", "summary", e.target.value)
-                          }
-                          className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-32 resize-none transition-colors"
-                          placeholder="Write a compelling professional summary..."
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Skills Tab */}
-                {activeTab === "skills" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold mb-6 text-accent">
-                      Skills & Technologies
-                    </h2>
-
-                    {Object.entries(data.skills).map(([category, skills]) => (
-                      <div
-                        key={category}
-                        className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700"
-                      >
-                        <h3 className="text-lg font-bold text-accent mb-4 capitalize">
-                          {category} Skills
-                        </h3>
-
-                        {/* Current Skills */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {skills.map((skill, index) => (
-                            <div
-                              key={index}
-                              className="bg-secondary px-3 py-1 lg:px-4 lg:py-2 rounded-full flex items-center gap-2 border border-gray-600 hover:border-accent transition-colors"
-                            >
-                              <span className="text-sm">{skill}</span>
-                              <button
-                                onClick={() => {
-                                  const newSkills = skills.filter(
-                                    (_, i) => i !== index
-                                  );
-                                  setData((prev) => ({
-                                    ...prev,
-                                    skills: {
-                                      ...prev.skills,
-                                      [category]: newSkills,
-                                    },
-                                  }));
-                                }}
-                                className="text-red-400 hover:text-red-300 transition-colors text-lg leading-none"
-                                title="Remove skill"
-                              >
-                                &times;
-                              </button>
-                            </div>
-                          ))}
-                          {skills.length === 0 && (
-                            <p className="text-gray-500 text-sm">
-                              No skills added yet
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Add New Skill */}
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <input
-                            type="text"
-                            id={`newSkill-${category}`}
-                            placeholder={`Add new ${category} skill...`}
-                            className="flex-1 p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                const val = e.target.value.trim();
-                                if (val) {
-                                  setData((prev) => ({
-                                    ...prev,
-                                    skills: {
-                                      ...prev.skills,
-                                      [category]: [
-                                        ...prev.skills[category],
-                                        val,
-                                      ],
-                                    },
-                                  }));
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => {
-                              const input = document.getElementById(
-                                `newSkill-${category}`
-                              );
-                              const val = input.value.trim();
-                              if (val) {
-                                setData((prev) => ({
-                                  ...prev,
-                                  skills: {
-                                    ...prev.skills,
-                                    [category]: [...prev.skills[category], val],
-                                  },
-                                }));
-                                input.value = "";
-                              }
-                            }}
-                            className="px-4 py-3 lg:px-6 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition-colors whitespace-nowrap"
-                          >
-                            Add Skill
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Experience Tab */}
-                {activeTab === "experience" && (
-                  <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-2xl font-bold text-accent">
-                        Work Experience
-                      </h2>
-                      <button
-                        onClick={() => {
-                          const newExperience = {
-                            role: "",
-                            company: "",
-                            location: "",
-                            period: "",
-                            description: "",
-                          };
-                          setData((prev) => ({
-                            ...prev,
-                            experience: [...prev.experience, newExperience],
-                          }));
-                        }}
-                        className="px-4 py-2 lg:px-6 lg:py-3 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 whitespace-nowrap"
-                      >
-                        <span>+</span> Add New Experience
-                      </button>
-                    </div>
-
-                    <div className="space-y-4 lg:space-y-6">
-                      {data.experience.map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700 relative group"
-                        >
-                          <button
-                            onClick={() => {
-                              const newList = data.experience.filter(
-                                (_, i) => i !== index
-                              );
-                              setData((prev) => ({
-                                ...prev,
-                                experience: newList,
-                              }));
-                            }}
-                            className="absolute top-3 right-3 lg:top-4 lg:right-4 text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-500/20"
-                            title="Delete experience"
-                          >
-                            <svg
-                              className="w-4 h-4 lg:w-5 lg:h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {["role", "company", "location", "period"].map(
-                              (field) => (
-                                <div key={field} className="space-y-2">
-                                  <label className="block text-sm font-medium text-gray-400 capitalize">
-                                    {field}
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={item[field]}
-                                    onChange={(e) => {
-                                      const newList = [...data.experience];
-                                      newList[index][field] = e.target.value;
-                                      setData((prev) => ({
-                                        ...prev,
-                                        experience: newList,
-                                      }));
-                                    }}
-                                    className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                    placeholder={`Enter ${field}`}
-                                  />
-                                </div>
-                              )
-                            )}
-
-                            <div className="md:col-span-2 space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Description
-                              </label>
-                              <textarea
-                                value={item.description}
-                                onChange={(e) => {
-                                  const newList = [...data.experience];
-                                  newList[index].description = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    experience: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-32 resize-none transition-colors"
-                                placeholder="Describe your responsibilities and achievements..."
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Projects Tab */}
-                {activeTab === "projects" && (
-                  <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-2xl font-bold text-accent">
-                        Projects
-                      </h2>
-                      <button
-                        onClick={() => {
-                          const newProject = {
-                            name: "",
-                            technologies: "",
-                            description: "",
-                            period: "",
-                            images: [],
-                            demoUrl: "",
-                            githubUrl: "",
-                          };
-                          setData((prev) => ({
-                            ...prev,
-                            projects: [...prev.projects, newProject],
-                          }));
-                        }}
-                        className="px-4 py-2 lg:px-6 lg:py-3 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 whitespace-nowrap"
-                      >
-                        <span>+</span> Add New Project
-                      </button>
-                    </div>
-
-                    <div className="space-y-4 lg:space-y-6">
-                      {data.projects.map((project, index) => (
-                        <div
-                          key={index}
-                          className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700 relative group"
-                        >
-                          <button
-                            onClick={() => {
-                              const newList = data.projects.filter(
-                                (_, i) => i !== index
-                              );
-                              setData((prev) => ({
-                                ...prev,
-                                projects: newList,
-                              }));
-                            }}
-                            className="absolute top-3 right-3 lg:top-4 lg:right-4 text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-500/20"
-                            title="Delete project"
-                          >
-                            <svg
-                              className="w-4 h-4 lg:w-5 lg:h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {[
-                              "name",
-                              "technologies",
-                              "period",
-                              "demoUrl",
-                              "githubUrl",
-                            ].map((field) => (
-                              <div
-                                key={field}
-                                className={
-                                  field === "name" ? "md:col-span-2" : ""
-                                }
-                              >
-                                <label className="block text-sm font-medium text-gray-400 capitalize mb-2">
-                                  {field === "demoUrl"
-                                    ? "Demo URL"
-                                    : field === "githubUrl"
-                                    ? "GitHub URL"
-                                    : field}
-                                </label>
-                                <input
-                                  type="text"
-                                  value={project[field] || ""}
-                                  onChange={(e) => {
-                                    const newList = [...data.projects];
-                                    newList[index][field] = e.target.value;
-                                    setData((prev) => ({
-                                      ...prev,
-                                      projects: newList,
-                                    }));
-                                  }}
-                                  className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                  placeholder={`Enter ${field}`}
-                                />
-                              </div>
-                            ))}
-
-                            <div className="md:col-span-2 space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Description
-                              </label>
-                              <textarea
-                                value={project.description}
-                                onChange={(e) => {
-                                  const newList = [...data.projects];
-                                  newList[index].description = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    projects: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-32 resize-none transition-colors"
-                                placeholder="Describe your project..."
-                              />
-                            </div>
-
-                            {/* Project Images */}
-                            <div className="md:col-span-2 space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Project Images
-                                <span className="text-xs text-gray-500 ml-2">
-                                  (Use arrows to reorder)
-                                </span>
-                              </label>
-                              <div className="flex flex-wrap gap-3 mb-4">
-                                {project.images &&
-                                  project.images.map((img, imgIndex) => (
-                                    <div
-                                      key={imgIndex}
-                                      className="relative group/image"
-                                    >
-                                      <img
-                                        src={getAssetUrl(img)}
-                                        alt={`Project ${index + 1}`}
-                                        className="w-20 h-20 lg:w-32 lg:h-32 object-cover rounded border-2 border-gray-600 hover:border-accent transition-colors"
-                                      />
-
-                                      {/* Order badge */}
-                                      <div className="absolute top-1 left-1 bg-primary/90 text-accent text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border border-accent/50">
-                                        {imgIndex + 1}
-                                      </div>
-
-                                      {/* Move left button */}
-                                      {imgIndex > 0 && (
-                                        <button
-                                          onClick={() => {
-                                            const newList = [...data.projects];
-                                            const images = [
-                                              ...newList[index].images,
-                                            ];
-                                            // Swap with previous
-                                            [
-                                              images[imgIndex - 1],
-                                              images[imgIndex],
-                                            ] = [
-                                              images[imgIndex],
-                                              images[imgIndex - 1],
-                                            ];
-                                            newList[index].images = images;
-                                            setData((prev) => ({
-                                              ...prev,
-                                              projects: newList,
-                                            }));
-                                            toast.success("Image moved left", {
-                                              icon: "⬅️",
-                                              duration: 1500,
-                                            });
-                                          }}
-                                          className="absolute top-1/2 -translate-y-1/2 -left-1 lg:-left-2 bg-blue-500 text-white rounded-full w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center text-sm opacity-100 lg:opacity-0 lg:group-hover/image:opacity-100 transition-opacity hover:bg-blue-600 shadow-lg"
-                                          title="Move left"
-                                        >
-                                          ←
-                                        </button>
-                                      )}
-
-                                      {/* Move right button */}
-                                      {imgIndex < project.images.length - 1 && (
-                                        <button
-                                          onClick={() => {
-                                            const newList = [...data.projects];
-                                            const images = [
-                                              ...newList[index].images,
-                                            ];
-                                            // Swap with next
-                                            [
-                                              images[imgIndex],
-                                              images[imgIndex + 1],
-                                            ] = [
-                                              images[imgIndex + 1],
-                                              images[imgIndex],
-                                            ];
-                                            newList[index].images = images;
-                                            setData((prev) => ({
-                                              ...prev,
-                                              projects: newList,
-                                            }));
-                                            toast.success("Image moved right", {
-                                              icon: "➡️",
-                                              duration: 1500,
-                                            });
-                                          }}
-                                          className="absolute top-1/2 -translate-y-1/2 -right-1 lg:-right-2 bg-blue-500 text-white rounded-full w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center text-sm opacity-100 lg:opacity-0 lg:group-hover/image:opacity-100 transition-opacity hover:bg-blue-600 shadow-lg"
-                                          title="Move right"
-                                        >
-                                          →
-                                        </button>
-                                      )}
-
-                                      {/* Delete button */}
-                                      <button
-                                        onClick={() => {
-                                          const newList = [...data.projects];
-                                          newList[index].images = newList[
-                                            index
-                                          ].images.filter(
-                                            (_, i) => i !== imgIndex
-                                          );
-                                          setData((prev) => ({
-                                            ...prev,
-                                            projects: newList,
-                                          }));
-                                          toast.success("Image removed", {
-                                            icon: "🗑️",
-                                            duration: 1500,
-                                          });
-                                        }}
-                                        className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-red-500 text-white rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center text-xs opacity-0 group-hover/image:opacity-100 transition-opacity hover:bg-red-600"
-                                        title="Delete image"
-                                      >
-                                        &times;
-                                      </button>
-                                    </div>
-                                  ))}
-                              </div>
-
-                              <input
-                                type="file"
-                                multiple
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const files = Array.from(e.target.files);
-                                  if (files.length === 0) return;
-
-                                  // Stage the images for upload
-                                  const newImages = [];
-                                  files.forEach((file) => {
-                                    const preview = URL.createObjectURL(file);
-                                    const imageId = `project-${index}-img-${Date.now()}-${Math.random()}`;
-
-                                    // Add to staged images
-                                    setStagedImages((prev) => ({
-                                      ...prev,
-                                      projects: {
-                                        ...prev.projects,
-                                        [imageId]: {
-                                          file,
-                                          preview,
-                                          projectIndex: index,
-                                        },
-                                      },
-                                    }));
-
-                                    newImages.push(preview);
-                                  });
-
-                                  // Update data with preview URLs
-                                  const newList = [...data.projects];
-                                  newList[index].images = [
-                                    ...(newList[index].images || []),
-                                    ...newImages,
-                                  ];
-                                  setData((prev) => ({
-                                    ...prev,
-                                    projects: newList,
-                                  }));
-
-                                  toast.success(
-                                    `${files.length} image(s) staged - click Save to upload`,
-                                    {
-                                      icon: "📸",
-                                    }
-                                  );
-
-                                  e.target.value = ""; // Reset input
-                                }}
-                                className="w-full text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
-                              />
-                              <p className="text-xs text-gray-500">
-                                You can select multiple images - they will be
-                                uploaded when you click Save
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Achievements Tab */}
-                {activeTab === "achievements" && (
-                  <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-2xl font-bold text-accent">
-                        Certifications & Awards
-                      </h2>
-                      <button
-                        onClick={() => {
-                          const newAchievement = {
-                            id: `achievement-${Date.now()}`,
-                            type: "certification",
-                            name: "",
-                            issuer: "",
-                            date: new Date().toISOString().split("T")[0],
-                            description: "",
-                            image: null,
-                          };
-                          setData((prev) => ({
-                            ...prev,
-                            achievements: [
-                              ...(prev.achievements || []),
-                              newAchievement,
-                            ],
-                          }));
-                        }}
-                        className="px-4 py-2 lg:px-6 lg:py-3 bg-accent text-primary font-bold rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 whitespace-nowrap"
-                      >
-                        <span>+</span> Add New Achievement
-                      </button>
-                    </div>
-
-                    <div className="space-y-4 lg:space-y-6">
-                      {(data.achievements || []).map((achievement, index) => (
-                        <div
-                          key={achievement.id}
-                          className="bg-primary p-4 lg:p-6 rounded-lg border border-gray-700 relative group"
-                        >
-                          <button
-                            onClick={() => {
-                              setConfirmDialog({
-                                isOpen: true,
-                                title: "Delete Achievement?",
-                                message: `Are you sure you want to delete "${achievement.name}"? This action cannot be undone.`,
-                                onConfirm: async () => {
-                                  // Delete image from Cloudinary if exists
-                                  if (
-                                    achievement.image &&
-                                    achievement.image.startsWith("http")
-                                  ) {
-                                    await deleteCloudinaryImage(
-                                      achievement.image
-                                    );
-                                  }
-                                  const newList = data.achievements.filter(
-                                    (_, i) => i !== index
-                                  );
-                                  setData((prev) => ({
-                                    ...prev,
-                                    achievements: newList,
-                                  }));
-                                },
-                              });
-                            }}
-                            className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Delete achievement"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Type
-                              </label>
-                              <select
-                                value={achievement.type}
-                                onChange={(e) => {
-                                  const newList = [...data.achievements];
-                                  newList[index].type = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    achievements: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                              >
-                                <option value="certification">
-                                  Certification
-                                </option>
-                                <option value="award">Award</option>
-                              </select>
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Date Received
-                              </label>
-                              <input
-                                type="date"
-                                value={achievement.date}
-                                onChange={(e) => {
-                                  const newList = [...data.achievements];
-                                  newList[index].date = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    achievements: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                {achievement.type === "certification"
-                                  ? "Certification"
-                                  : "Award"}{" "}
-                                Name
-                              </label>
-                              <input
-                                type="text"
-                                value={achievement.name}
-                                onChange={(e) => {
-                                  const newList = [...data.achievements];
-                                  newList[index].name = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    achievements: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g., AWS Certified Solutions Architect"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Issued By / Organization
-                              </label>
-                              <input
-                                type="text"
-                                value={achievement.issuer}
-                                onChange={(e) => {
-                                  const newList = [...data.achievements];
-                                  newList[index].issuer = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    achievements: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g., Amazon Web Services"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 mb-4">
-                            <label className="block text-sm font-medium text-gray-400">
-                              Description (Optional)
-                            </label>
-                            <textarea
-                              value={achievement.description || ""}
-                              onChange={(e) => {
-                                const newList = [...data.achievements];
-                                newList[index].description = e.target.value;
-                                setData((prev) => ({
-                                  ...prev,
-                                  achievements: newList,
-                                }));
-                              }}
-                              className="w-full p-3 rounded bg-secondary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-24 resize-none transition-colors"
-                              placeholder="Brief description of the achievement..."
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-400">
-                              Certificate/Award Image (Optional)
-                            </label>
-                            <div className="flex items-center gap-4">
-                              {achievement.image && (
-                                <ImagePreview
-                                  src={getAssetUrl(achievement.image)}
-                                  onRemove={() => {
-                                    const newList = [...data.achievements];
-                                    newList[index].image = null;
-                                    setData((prev) => ({
-                                      ...prev,
-                                      achievements: newList,
-                                    }));
-                                    // Remove from staged images
-                                    setStagedImages((prev) => {
-                                      const newStaged = { ...prev };
-                                      delete newStaged.achievements[
-                                        achievement.id
-                                      ];
-                                      return newStaged;
-                                    });
-                                  }}
-                                  isStaged={
-                                    stagedImages.achievements[achievement.id]
-                                      ?.file
-                                  }
-                                />
-                              )}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (!file) return;
-
-                                  // Stage the image
-                                  const preview = URL.createObjectURL(file);
-                                  setStagedImages((prev) => ({
-                                    ...prev,
-                                    achievements: {
-                                      ...prev.achievements,
-                                      [achievement.id]: {
-                                        file,
-                                        preview,
-                                        oldUrl: achievement.image,
-                                      },
-                                    },
-                                  }));
-
-                                  // Update data with preview
-                                  const newList = [...data.achievements];
-                                  newList[index].image = preview;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    achievements: newList,
-                                  }));
-
-                                  e.target.value = "";
-                                }}
-                                className="flex-1 text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
-                              />
-                            </div>
-                            {stagedImages.achievements[achievement.id] && (
-                              <p className="text-yellow-500 text-sm flex items-center gap-2">
-                                <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-                                Image staged - click Save to upload
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-
-                      {(!data.achievements ||
-                        data.achievements.length === 0) && (
-                        <div className="text-center py-12 text-gray-400">
-                          <svg
-                            className="w-16 h-16 mx-auto mb-4 opacity-50"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                            />
-                          </svg>
-                          <p>No achievements added yet</p>
-                          <p className="text-sm mt-2">
-                            Click "Add New Achievement" to get started
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Education Management */}
-                {activeTab === "education" && (
-                  <div>
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-accent">
-                        Education
-                      </h2>
-                      <div className="flex items-center gap-4">
-                        <label className="flex items-center cursor-pointer">
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              className="sr-only"
-                              checked={data.settings?.showEducation ?? true}
-                              onChange={(e) => {
-                                handleChange(
-                                  "settings",
-                                  "showEducation",
-                                  e.target.checked
-                                );
-                              }}
-                            />
-                            <div
-                              className={`block w-14 h-8 rounded-full transition-colors ${
-                                data.settings?.showEducation
-                                  ? "bg-accent"
-                                  : "bg-gray-600"
-                              }`}
-                            ></div>
-                            <div
-                              className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
-                                data.settings?.showEducation
-                                  ? "transform translate-x-6"
-                                  : ""
-                              }`}
-                            ></div>
-                          </div>
-                          <div className="ml-3 text-gray-300 font-medium">
-                            {data.settings?.showEducation
-                              ? "Visible"
-                              : "Hidden"}
-                          </div>
-                        </label>
-                        <button
-                          onClick={() => {
-                            const newEdu = {
-                              id: `edu-${Date.now()}`,
-                              degree: "",
-                              institution: "",
-                              location: "",
-                              period: "",
-                              grade: "",
-                              description: "",
-                              logo: "",
-                            };
-                            setData((prev) => ({
-                              ...prev,
-                              education: [newEdu, ...(prev.education || [])],
-                            }));
-                          }}
-                          className="bg-accent text-primary px-4 py-2 rounded font-bold hover:bg-opacity-90 flex items-center gap-2"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          Add Education
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-6">
-                      {data.education?.map((edu, index) => (
-                        <div
-                          key={edu.id}
-                          className="bg-secondary p-6 rounded-xl border border-gray-700"
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-bold text-white">
-                              {edu.degree || "New Education"}
-                            </h3>
-                            <button
-                              onClick={() => {
-                                setConfirmDialog({
-                                  isOpen: true,
-                                  title: "Delete Education",
-                                  message:
-                                    "Are you sure you want to delete this education entry?",
-                                  onConfirm: () => {
-                                    const newList = data.education.filter(
-                                      (e) => e.id !== edu.id
-                                    );
-                                    setData((prev) => ({
-                                      ...prev,
-                                      education: newList,
-                                    }));
-                                    setConfirmDialog({
-                                      ...confirmDialog,
-                                      isOpen: false,
-                                    });
-                                  },
-                                });
-                              }}
-                              className="text-red-500 hover:text-red-400 p-2"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Degree / Course
-                              </label>
-                              <input
-                                type="text"
-                                value={edu.degree || ""}
-                                onChange={(e) => {
-                                  const newList = [...data.education];
-                                  newList[index].degree = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    education: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g. Bachelor of Computer Science"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Institution
-                              </label>
-                              <input
-                                type="text"
-                                value={edu.institution || ""}
-                                onChange={(e) => {
-                                  const newList = [...data.education];
-                                  newList[index].institution = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    education: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g. University Name"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Location
-                              </label>
-                              <input
-                                type="text"
-                                value={edu.location || ""}
-                                onChange={(e) => {
-                                  const newList = [...data.education];
-                                  newList[index].location = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    education: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g. City, Country"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Period
-                              </label>
-                              <input
-                                type="text"
-                                value={edu.period || ""}
-                                onChange={(e) => {
-                                  const newList = [...data.education];
-                                  newList[index].period = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    education: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g. 2018 - 2022"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-400">
-                                Grade / CGPA (Optional)
-                              </label>
-                              <input
-                                type="text"
-                                value={edu.grade || ""}
-                                onChange={(e) => {
-                                  const newList = [...data.education];
-                                  newList[index].grade = e.target.value;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    education: newList,
-                                  }));
-                                }}
-                                className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-colors"
-                                placeholder="e.g. CGPA: 8.5/10"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 mt-4">
-                            <label className="block text-sm font-medium text-gray-400">
-                              Description
-                            </label>
-                            <textarea
-                              value={edu.description || ""}
-                              onChange={(e) => {
-                                const newList = [...data.education];
-                                newList[index].description = e.target.value;
-                                setData((prev) => ({
-                                  ...prev,
-                                  education: newList,
-                                }));
-                              }}
-                              className="w-full p-3 rounded bg-primary border border-gray-700 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none h-24 resize-none transition-colors"
-                              placeholder="Brief description of your studies..."
-                            />
-                          </div>
-
-                          <div className="space-y-2 mt-4">
-                            <label className="block text-sm font-medium text-gray-400">
-                              Institution Logo (Small)
-                            </label>
-                            <div className="flex items-center gap-4">
-                              {edu.logo && (
-                                <ImagePreview
-                                  src={getAssetUrl(edu.logo)}
-                                  onRemove={() => {
-                                    const newList = [...data.education];
-                                    newList[index].logo = "";
-                                    setData((prev) => ({
-                                      ...prev,
-                                      education: newList,
-                                    }));
-                                    // Remove from staged images
-                                    setStagedImages((prev) => {
-                                      const newStaged = { ...prev };
-                                      delete newStaged.education[edu.id];
-                                      return newStaged;
-                                    });
-                                  }}
-                                  isStaged={
-                                    stagedImages.education[edu.id]?.file
-                                  }
-                                />
-                              )}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (!file) return;
-
-                                  // Stage the image
-                                  const preview = URL.createObjectURL(file);
-                                  setStagedImages((prev) => ({
-                                    ...prev,
-                                    education: {
-                                      ...(prev.education || {}),
-                                      [edu.id]: {
-                                        file,
-                                        preview,
-                                        oldUrl: edu.logo,
-                                      },
-                                    },
-                                  }));
-
-                                  // Update data with preview
-                                  const newList = [...data.education];
-                                  newList[index].logo = preview;
-                                  setData((prev) => ({
-                                    ...prev,
-                                    education: newList,
-                                  }));
-
-                                  e.target.value = "";
-                                }}
-                                className="flex-1 text-sm text-gray-400 file:mr-2 file:py-2 file:px-3 lg:file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-primary hover:file:bg-opacity-90"
-                              />
-                            </div>
-                            {stagedImages.education?.[edu.id] && (
-                              <p className="text-yellow-500 text-sm flex items-center gap-2">
-                                <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-                                Image staged - click Save to upload
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-
-                      {(!data.education || data.education.length === 0) && (
-                        <div className="text-center py-12 text-gray-400">
-                          <svg
-                            className="w-16 h-16 mx-auto mb-4 opacity-50"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 14l9-5-9-5-9 5 9 5z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
-                            />
-                          </svg>
-                          <p>No education entries added yet</p>
-                          <p className="text-sm mt-2">
-                            Click "Add Education" to get started
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        </main>
       </div>
+
+      {/* Image Preview Modal */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewImage(null)}
+            className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center p-4 cursor-zoom-out"
+          >
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70"
+            >
+              <X size={24} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

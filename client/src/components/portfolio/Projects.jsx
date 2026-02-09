@@ -540,6 +540,7 @@ const Projects = ({ projects }) => {
 
   return (
     <section
+      id="projects"
       ref={sectionRef}
       className={
         isMobile ? "section relative" : "section relative overflow-hidden"

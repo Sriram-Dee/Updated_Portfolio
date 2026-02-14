@@ -47,6 +47,12 @@ const Achievements = ({ achievements }) => {
                 setSelectedAchievement(item);
               }
             }}
+            onMouseEnter={() => {
+              if (item.image) {
+                const img = new Image();
+                img.src = optimizeImage(item.image, 1200);
+              }
+            }}
             className={`group relative bg-surface/30 backdrop-blur-sm border border-white/5 rounded-2xl p-5 hover:bg-surface/50 transition-all duration-300 flex gap-5 items-center overflow-hidden ${
               item.link || item.image
                 ? "cursor-pointer hover:border-accent/30"

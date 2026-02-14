@@ -450,6 +450,11 @@ const Projects = ({ projects }) => {
   }, []);
 
   // ... (GSAP logic omitted, assumed unchanged from previous view) ...
+  // CSS Sticky Calculation
+  const stackHeight = 500; // Height of the card stack
+  const scrollDistance = (displayedProjects.length - 1) * 500;
+  const sectionHeight = isMobile ? stackHeight + scrollDistance + 300 : "auto";
+
   // GSAP ScrollTrigger for mobile rummy card stacking
   useLayoutEffect(() => {
     // Register plugin
@@ -467,7 +472,7 @@ const Projects = ({ projects }) => {
       if (cards.length === 0) return;
 
       // Ensure container has height for sticky to work with absolute children
-      gsap.set(containerRef.current, { height: 400 });
+      gsap.set(containerRef.current, { height: stackHeight });
 
       // Set initial state for cards
       cards.forEach((card, i) => {
@@ -487,9 +492,11 @@ const Projects = ({ projects }) => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current, // Use the SECTION as the trigger
-          start: "top top", // Start when section hits top
-          end: "bottom bottom", // End when section leaves
-          scrub: 1,
+          start: "top 200px", // Lowered pinning position
+          // End 100px BEFORE the unpin point to ensure animation finishes
+          // 200 (top offset) + stackHeight (height of sticky) + 100 (buffer)
+          end: `bottom ${200 + stackHeight + 100}px`,
+          scrub: 0.5, // Reduced scrub for faster visual response
           preventOverlaps: true,
           invalidateOnRefresh: true,
         },
@@ -533,17 +540,14 @@ const Projects = ({ projects }) => {
     return () => mm.revert();
   }, [showAll, displayedProjects.length]);
 
-  // CSS Sticky Calculation
-  const stackHeight = 400; // Height of the card stack
-  const scrollDistance = (displayedProjects.length - 1) * 150;
-  const sectionHeight = isMobile ? stackHeight + scrollDistance + 200 : "auto"; // Extra buffer
-
   return (
     <section
       id="projects"
       ref={sectionRef}
       className={
-        isMobile ? "section relative" : "section relative overflow-hidden"
+        isMobile
+          ? "section relative flex flex-col"
+          : "section relative overflow-hidden"
       }
       style={{
         minHeight: isMobile ? `${sectionHeight}px` : "auto",
@@ -554,7 +558,9 @@ const Projects = ({ projects }) => {
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-white/[0.015] rounded-full blur-[150px]" />
       </div>
-      <div className="container relative z-10">
+      <div
+        className={`container relative z-10 ${isMobile ? "flex flex-col flex-1" : ""}`}
+      >
         <SectionHeader
           title="Featured Projects"
           subtitle="Explore My Work"
@@ -573,7 +579,7 @@ const Projects = ({ projects }) => {
             isMobile
               ? {
                   position: "sticky",
-                  top: "100px",
+                  top: "200px",
                   height: `${stackHeight}px`,
                   // Ensure it doesn't overflow horizontally
                   overflow: "visible",
@@ -592,6 +598,8 @@ const Projects = ({ projects }) => {
                       backgroundColor: "#0a0a0a",
                       borderRadius: "16px",
                       zIndex: index + 10,
+                      willChange: "transform",
+                      backfaceVisibility: "hidden",
                     }
                   : {}
               }

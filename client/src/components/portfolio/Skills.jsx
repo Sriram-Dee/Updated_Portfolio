@@ -75,7 +75,7 @@ const Skills = ({ skills }) => {
           centered
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 auto-rows-fr">
           {Object.entries(skills).map(([category, items], idx) => {
             const Icon = categoryIcons[category.toLowerCase()] || Globe;
 
@@ -87,6 +87,17 @@ const Skills = ({ skills }) => {
 
             if (visibleItems.length === 0) return null;
 
+            // Bento Grid Logic
+            const getGridClass = (cat) => {
+              const lowerCat = cat.toLowerCase();
+              if (lowerCat.includes("frontend")) return "order-1";
+              if (lowerCat.includes("backend")) return "order-2";
+              if (lowerCat.includes("ai"))
+                return "order-3 md:col-span-2 lg:order-4 lg:col-span-2";
+              if (lowerCat.includes("devops")) return "order-4 lg:order-3";
+              return "order-5";
+            };
+
             return (
               <motion.div
                 key={category}
@@ -94,15 +105,16 @@ const Skills = ({ skills }) => {
                 whileInView={{ opacity: 1, z: 0, rotateX: 0 }}
                 viewport={{ once: true }}
                 transition={{
-                  delay: idx * 0.2,
-                  duration: 0.7,
+                  delay: idx * 0.1, // Faster stagger
+                  duration: 0.5,
                   ease: "easeOut",
                 }}
+                className={`h-full ${getGridClass(category)}`}
               >
-                <TiltCard className="group cursor-pointer">
+                <TiltCard className="group cursor-pointer h-full">
                   {/* Main Card */}
                   <div
-                    className="relative rounded-3xl overflow-hidden bg-surface/50 backdrop-blur-xl border border-white/10 transition-all duration-500 group-hover:border-white/20"
+                    className="relative rounded-3xl overflow-hidden bg-surface/50 backdrop-blur-xl border border-white/10 transition-all duration-500 group-hover:border-white/20 h-full"
                     style={{
                       transformStyle: "preserve-3d",
                       boxShadow:

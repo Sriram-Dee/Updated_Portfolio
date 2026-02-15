@@ -182,8 +182,13 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
-  "languages": ["Tamil", "English"],
+  "awards": [
+    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
+  ],
+  "languages": [
+    "Tamil",
+    "English"
+  ],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/",
@@ -216,6 +221,15 @@
       "date": "2023-07-03",
       "description": "",
       "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763922078/portfolio/xns2kz5gn96anb1krtkq.jpg"
+    },
+    {
+      "id": "1771184587072-44vsoq4",
+      "name": "Claude Code in Action ",
+      "issuer": "Anthropic Education ",
+      "date": "Feb 2026",
+      "description": "Certified in Claude Code by Anthropic.\nSpecialized in Al-assisted development workflows and tool orchestration.\nExperienced with custom hooks, commands, and GitHub integrations.\nApplied context optimization and secure coding strategies.\nUtilized Claude SDK for intelligent automation and code review.",
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771184691/portfolio/kf1jizdyiqw4a4xxdref.jpg",
+      "link": "http://verify.skilljar.com/c/k7y6p5tyd9gr"
     }
   ],
   "settings": {

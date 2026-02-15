@@ -53,12 +53,18 @@
       "SSH",
       "HTTPS Setup"
     ],
-    "Tools": [
-      "Termius",
-      "PuTTY",
-      "Git/GitHub",
-      "VS Code"
-    ]
+    "AI Engineering": [
+      "AI Agents",
+      "Model Context Protocol (MCP)",
+      "Stitch",
+      "Antigravity",
+      "Gemini CLI",
+      "Claude Code",
+      "Open Code",
+      "Prompt Engineering",
+      "LLM Integration"
+    ],
+    "Tools": ["Termius", "PuTTY", "Git/GitHub", "VS Code"]
   },
   "professional_skills": [
     "Full-Stack Application Development",
@@ -70,12 +76,22 @@
   "projects": [
     {
       "name": "Draco Fitness",
-      "technologies": "React.js, Tailwind CSS, Recharts, Vite, AI Agents, MCP",
-      "description": "A high-performance fitness platform fully built using AI agents and MCP (Model Context Protocol). From generating UI designs with Stitch to deploying the final application, the entire process was orchestrated in a single session. Features a dynamic public website and a comprehensive admin dashboard for analytics and content management.",
-      "period": "Feb 2026",
+      "technologies": "React.js, Tailwind CSS, Recharts, Vite, AI Agents, MCP, Stitch",
+      "description": "A comprehensive fitness platform engineered entirely through AI-native workflows. Leveraged **Antigravity** and **Model Context Protocol (MCP)** to orchestrate full-stack code generation, while utilizing **Stitch** for instant high-fidelity UI design. This project demonstrates the future of **AI-Assisted Engineering**, achieving enterprise-grade quality with 90% reduced development time.",
+      "period": "Jan 2026",
       "images": [],
       "demoUrl": "https://Sriram-Dee.github.io/draco-fitness-app/",
       "github": "https://github.com/Sriram-Dee/kadora-fitness-app",
+      "enabled": true
+    },
+    {
+      "name": "Tamil Shop Announcer",
+      "technologies": "React.js, Web Speech API, Tailwind CSS, Gemini CLI, Claude Code",
+      "description": "A specialized voice automation system for Tamil retail environments, built to bridge the language gap in digital tools. Engineered using **Gemini CLI** and **Claude Code**, this project features React-driven text-to-speech synthesis and precise audio scheduling. The development process utilized advanced LLMs to rapidly solve complex language processing challenges and ensure natural-sounding Tamil output.",
+      "period": "Feb 2026",
+      "images": [],
+      "demoUrl": "https://shop-announcer-demo.vercel.app",
+      "github": "https://github.com/Sriram-Dee/tamil-shop-announcer",
       "enabled": true
     },
     {
@@ -149,13 +165,8 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": [
-    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
-  ],
-  "languages": [
-    "Tamil",
-    "English"
-  ],
+  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
+  "languages": ["Tamil", "English"],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/",

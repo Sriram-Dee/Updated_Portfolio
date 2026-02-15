@@ -17,7 +17,7 @@
     "location": "Cuddalore, India",
     "github": "https://github.com/Sriram-Dee",
     "linkedin": "https://www.linkedin.com/in/sriram-r-14s26d2019l",
-    "summary": "Results-oriented Full-Stack Developer with a competitive edge in AI-native workflows. With 2+ years of experience shipping robust web applications using React, Node.js, and MongoDB, I pioneer the adoption of AI-assisted development tools (MCP, Stitch, Gemini) to accelerate delivery and enhance code quality. Passionate about bridging the gap between traditional engineering and autonomous AI systems.",
+    "summary": "Results-oriented Full-Stack Developer specializing in bridging immersive web technologies with autonomous AI systems. With 2+ years of experience, I architect scalable MERN applications, real-time VR analytics dashboards, and seamless mobile integrations. I leverage advanced AI-assisted workflows (MCP, Stitch) to accelerate delivery while engineering high-performance solutions that redefine user engagement through interactive 3D visualizations.",
     "other_portfolio": "https://updated-portfolio-git-dev-srirams-projects-fa79d99c.vercel.app/"
   },
   "skills": {
@@ -39,6 +39,7 @@
       "Node.js",
       "Express.js",
       "RESTful APIs",
+      "WebSockets (Socket.io)",
       "JWT",
       "Multer",
       "GridFS",
@@ -64,7 +65,14 @@
       "Prompt Engineering",
       "AI-Assisted Development"
     ],
-    "Tools": ["Termius", "PuTTY", "Git/GitHub", "VS Code"]
+    "Tools": [
+      "Termius",
+      "PuTTY",
+      "Git/GitHub",
+      "VS Code",
+      "Postman",
+      "Capacitor"
+    ]
   },
   "professional_skills": [
     "Full-Stack Application Development",
@@ -77,18 +85,27 @@
     {
       "name": "Draco Fitness",
       "technologies": "React.js, Tailwind CSS, Recharts, Vite, AI Agents, MCP, Stitch",
-      "description": "A comprehensive fitness platform engineered entirely through AI-native workflows. Leveraged **Antigravity** and **Model Context Protocol (MCP)** to orchestrate full-stack code generation, while utilizing **Stitch** for instant high-fidelity UI design. This project demonstrates the future of **AI-Assisted Engineering**, achieving enterprise-grade quality with 90% reduced development time.",
-      "period": "Jan 2026",
+      "description": "A comprehensive fitness platform engineered entirely through AI-native workflows. Leveraged Antigravity and Model Context Protocol (MCP) to orchestrate full-stack code generation, while utilizing Stitch for instant high-fidelity UI design. This project demonstrates the future of AI-Assisted Engineering, achieving enterprise-grade quality with 90% reduced development time.",
+      "period": "Feb 2026",
       "images": [],
       "demoUrl": "https://Sriram-Dee.github.io/draco-fitness-app/",
       "github": "https://github.com/Sriram-Dee/kadora-fitness-app",
       "enabled": true
     },
     {
+      "name": "Real-Time VR Analytics & WebGL Integration",
+      "technologies": "React.js, Node.js, WebSockets, Unity WebGL",
+      "description": "Engineered the web infrastructure for an immersive research platform. Integrated a Unity WebGL build into a React/Vite application and developed robust Node.js/WebSocket APIs to stream real-time eye-tracking data from the VR environment to a custom analytics dashboard. This system ensured seamless, low-latency communication between the simulation and the web interface.",
+      "period": "2024",
+      "images": [],
+      "demoUrl": "",
+      "enabled": true
+    },
+    {
       "name": "Tamil Shop Announcer",
       "technologies": "React.js, Web Speech API, Tailwind CSS, Gemini CLI, Claude Code",
-      "description": "A specialized voice automation system for Tamil retail environments, built to bridge the language gap in digital tools. Engineered using **Gemini CLI** and **Claude Code**, this project features React-driven text-to-speech synthesis and precise audio scheduling. The development process utilized advanced LLMs to rapidly solve complex language processing challenges and ensure natural-sounding Tamil output.",
-      "period": "Feb 2026",
+      "description": "A specialized voice automation system for Tamil retail environments, built to bridge the language gap in digital tools. Engineered using Gemini CLI and Claude Code, this project features React-driven text-to-speech synthesis and precise audio scheduling. The development process utilized advanced LLMs to rapidly solve complex language processing challenges and ensure natural-sounding Tamil output.",
+      "period": "Jan 2026",
       "images": [],
       "demoUrl": "https://shop-announcer-demo.vercel.app",
       "github": "https://github.com/Sriram-Dee/tamil-shop-announcer",
@@ -120,19 +137,19 @@
   ],
   "experience": [
     {
-      "role": "Junior Developer",
+      "role": "Junior Software Engineer",
       "company": "Hema's Enterprise Pvt Ltd",
       "location": "Cuddalore",
       "period": "March 2024 – Present",
-      "description": "Developed full-stack apps using React.js, Node.js, and MongoDB with RESTful APIs. Implemented JWT authentication, GridFS file management, and handled DevOps deployment using Docker, Nginx, and PM2. Collaborated in Agile sprints and managed version control with Git/GitHub.",
+      "description": "Architected secure MERN applications with JWT authentication and Role-Based Access Control (RBAC). Built enterprise-grade internal tools featuring interactive 3D visualizations using Three.js, improving operational insights. Optimized production deployments using Docker and Nginx.",
       "enabled": true
     },
     {
-      "role": "Virtual Auditor - Trainee",
+      "role": "Developer Trainee",
       "company": "Hema's Enterprise Pvt Ltd",
       "location": "Cuddalore ",
       "period": "Jan 2023 - Aug 2023",
-      "description": "Implemented cutting-edge virtual supervision system for milk trucks, utilizing GPS tracking and real-time data analysis to enhance visibility of warehouses, manufacturing facilities, and milk collection centers, Resulting in a 20% reduction in delivery time anda 10% increase in overall operational efficiency for Cavinkare during an 8-month period."
+      "description": "Assisted in the development of RESTful APIs and MERN stack modules for company operations. Collaborated on frontend component design and managed version control workflows using Git and GitHub."
     }
   ],
   "education": [

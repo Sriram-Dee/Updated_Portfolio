@@ -87,7 +87,13 @@
       "technologies": "React.js, Tailwind CSS, Recharts, Vite, AI Agents, MCP, Stitch",
       "description": "A comprehensive fitness platform engineered entirely through AI-native workflows. Leveraged Antigravity and Model Context Protocol (MCP) to orchestrate full-stack code generation, while utilizing Stitch for instant high-fidelity UI design. This project demonstrates the future of AI-Assisted Engineering, achieving enterprise-grade quality with 90% reduced development time.",
       "period": "Feb 2026",
-      "images": [],
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225911/portfolio/zqwskmtiqnb1sssyyyes.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225911/portfolio/v7qfrotchso9kkfdrqun.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225911/portfolio/lfhkdcuvwmuqynswubyp.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225912/portfolio/piizw3s1dhh4eqxpnk49.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225912/portfolio/esh5nbgoumtuarps118o.jpg"
+      ],
       "demoUrl": "https://Sriram-Dee.github.io/draco-fitness-app/",
       "github": "https://github.com/Sriram-Dee/kadora-fitness-app",
       "enabled": true
@@ -182,8 +188,13 @@
     "MySQL (Udemy)",
     "Diploma in Computer Applications (CSC)"
   ],
-  "awards": ["Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"],
-  "languages": ["Tamil", "English"],
+  "awards": [
+    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
+  ],
+  "languages": [
+    "Tamil",
+    "English"
+  ],
   "links": {
     "website_1": "https://tms.digifox.studio/",
     "website_2": "https://tunefor2.com/",
@@ -216,6 +227,15 @@
       "date": "2023-07-03",
       "description": "",
       "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763922078/portfolio/xns2kz5gn96anb1krtkq.jpg"
+    },
+    {
+      "id": "1771184587072-44vsoq4",
+      "name": "Claude Code in Action ",
+      "issuer": "Anthropic Education ",
+      "date": "2026-02-15",
+      "description": "",
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771184691/portfolio/kf1jizdyiqw4a4xxdref.jpg",
+      "link": "http://verify.skilljar.com/c/k7y6p5tyd9gr"
     }
   ],
   "settings": {

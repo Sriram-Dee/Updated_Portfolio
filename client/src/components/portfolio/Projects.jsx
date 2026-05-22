@@ -618,7 +618,7 @@ const Projects = ({ projects }) => {
         {/* Show More / Jump to Next Section */}
         {hasMoreProjects && (
           <motion.div
-            className="flex justify-center mt-12"
+            className={`flex justify-center ${isMobile ? "mt-auto pb-12" : "mt-12"}`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

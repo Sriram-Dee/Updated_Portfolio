@@ -1,0 +1,244 @@
+{
+  "theme": {
+    "primary": "#030712",
+    "secondary": "#0f172a",
+    "accent": "#8b5cf6",
+    "accent-secondary": "#2dd4bf",
+    "accent-tertiary": "#f472b6",
+    "text-primary": "#f8fafc",
+    "text-secondary": "#94a3b8"
+  },
+  "profile": {
+    "name": "Sriram R",
+    "avatar": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763908753/portfolio/trdp0zshddypkobxyriv.jpg",
+    "title": "Junior Fullstack Developer",
+    "email": "sriram14jeeva12@gmail.com",
+    "phone": "+91 8667286277",
+    "location": "Cuddalore, India",
+    "github": "https://github.com/Sriram-Dee",
+    "linkedin": "https://www.linkedin.com/in/sriram-r-14s26d2019l",
+    "summary": "Results-oriented Full-Stack Developer specializing in bridging immersive web technologies with autonomous AI systems. With 2+ years of experience, I architect scalable MERN applications, real-time VR analytics dashboards, and seamless mobile integrations. I leverage advanced AI-assisted workflows (MCP, Stitch) to accelerate delivery while engineering high-performance solutions that redefine user engagement through interactive 3D visualizations.",
+    "other_portfolio": "https://updated-portfolio-git-dev-srirams-projects-fa79d99c.vercel.app/"
+  },
+  "skills": {
+    "Frontend": [
+      {
+        "name": "React.js",
+        "enabled": true
+      },
+      "Redux",
+      "Three.js",
+      "React Three Fiber",
+      "Ant Design (Antd)",
+      "Material UI (MUI)",
+      "JavaScript",
+      "Bootstrap",
+      "Tailwind CSS"
+    ],
+    "Backend": [
+      "Node.js",
+      "Express.js",
+      "RESTful APIs",
+      "WebSockets (Socket.io)",
+      "JWT",
+      "Multer",
+      "GridFS",
+      "MongoDB"
+    ],
+    "DevOps": [
+      "Linux",
+      "Docker",
+      "Docker Compose",
+      "Nginx",
+      "PM2",
+      "SSH",
+      "HTTPS Setup"
+    ],
+    "AI Engineering": [
+      "AI Agents",
+      "Model Context Protocol (MCP)",
+      "Stitch",
+      "Antigravity",
+      "Gemini CLI",
+      "Claude Code",
+      "Open Code",
+      "Prompt Engineering",
+      "AI-Assisted Development"
+    ],
+    "Tools": [
+      "Termius",
+      "PuTTY",
+      "Git/GitHub",
+      "VS Code",
+      "Postman",
+      "Capacitor"
+    ]
+  },
+  "professional_skills": [
+    "Full-Stack Application Development",
+    "Version Control and Code Management (Git/GitHub)",
+    "Analytical Thinking & Problem Solving",
+    "Attention to Detail and Code Optimization",
+    "Continuous Learning and Adaptability"
+  ],
+  "projects": [
+    {
+      "name": "Draco Fitness",
+      "technologies": "React.js, Tailwind CSS, Recharts, Vite, AI Agents, MCP, Stitch",
+      "description": "A comprehensive fitness platform engineered entirely through AI-native workflows. Leveraged Antigravity and Model Context Protocol (MCP) to orchestrate full-stack code generation, while utilizing Stitch for instant high-fidelity UI design. This project demonstrates the future of AI-Assisted Engineering, achieving enterprise-grade quality with 90% reduced development time.",
+      "period": "Feb 2026",
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225911/portfolio/zqwskmtiqnb1sssyyyes.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225911/portfolio/v7qfrotchso9kkfdrqun.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225911/portfolio/lfhkdcuvwmuqynswubyp.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225912/portfolio/piizw3s1dhh4eqxpnk49.jpg",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771225912/portfolio/esh5nbgoumtuarps118o.jpg"
+      ],
+      "demoUrl": "https://Sriram-Dee.github.io/draco-fitness-app/",
+      "github": "https://github.com/Sriram-Dee/kadora-fitness-app",
+      "enabled": true
+    },
+    {
+      "name": "Real-Time VR Analytics & WebGL Integration",
+      "technologies": "React.js, Node.js, WebSockets, Unity WebGL",
+      "description": "Engineered the web infrastructure for an immersive research platform. Integrated a Unity WebGL build into a React/Vite application and developed robust Node.js/WebSocket APIs to stream real-time eye-tracking data from the VR environment to a custom analytics dashboard. This system ensured seamless, low-latency communication between the simulation and the web interface.",
+      "period": "2024",
+      "images": [],
+      "demoUrl": "",
+      "enabled": true
+    },
+    {
+      "name": "Tamil Shop Announcer",
+      "technologies": "React.js, Web Speech API, Tailwind CSS, Gemini CLI, Claude Code",
+      "description": "A specialized voice automation system for Tamil retail environments, built to bridge the language gap in digital tools. Engineered using Gemini CLI and Claude Code, this project features React-driven text-to-speech synthesis and precise audio scheduling. The development process utilized advanced LLMs to rapidly solve complex language processing challenges and ensure natural-sounding Tamil output.",
+      "period": "Jan 2026",
+      "images": [],
+      "demoUrl": "https://shop-announcer-demo.vercel.app",
+      "github": "https://github.com/Sriram-Dee/tamil-shop-announcer",
+      "enabled": true
+    },
+    {
+      "name": "SEC Training Management System",
+      "technologies": "React.js, Node.js, MongoDB",
+      "description": "Developed an industrial training platform with dashboards, analytics, and secure authentication.",
+      "period": "March 2025 – Present",
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952612/portfolio/frg2h9recb9vfbz4zcbh.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952621/portfolio/lgcf1hbmkftvymrmnd3v.png",
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763952633/portfolio/rnsnanvy1yphqsb4ywuf.png"
+      ],
+      "demoUrl": "https://tmsdemo.digifox.studio",
+      "enabled": true
+    },
+    {
+      "name": "Tune For 2",
+      "technologies": "React.js, Spring Boot, MongoDB",
+      "description": "Built a custom song ordering platform with React front-end and Java Spring Boot backend.",
+      "period": "April 2024 – September 2024",
+      "images": [
+        "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763998168/portfolio/hjq1qug0gkt6n2rhxfdp.jpg"
+      ],
+      "demoUrl": "https://tunefor2.com"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Junior Software Engineer",
+      "company": "Hema's Enterprise Pvt Ltd",
+      "location": "Cuddalore",
+      "period": "March 2024 – Present",
+      "description": "Architected secure MERN applications with JWT authentication and Role-Based Access Control (RBAC). Built enterprise-grade internal tools featuring interactive 3D visualizations using Three.js, improving operational insights. Optimized production deployments using Docker and Nginx.",
+      "enabled": true
+    },
+    {
+      "role": "Developer Trainee",
+      "company": "Hema's Enterprise Pvt Ltd",
+      "location": "Cuddalore ",
+      "period": "Jan 2023 - Aug 2023",
+      "description": "Assisted in the development of RESTful APIs and MERN stack modules for company operations. Collaborated on frontend component design and managed version control workflows using Git and GitHub."
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1764416665957",
+      "degree": "Master of Computer Applications",
+      "institution": "Madras University",
+      "location": "Chennai, India",
+      "period": "2025 - Present",
+      "grade": "",
+      "description": "Pursuing MCA through distance education with a focus on computer applications, software development, and modern IT technologies.",
+      "logo": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764417295/portfolio/mo3y7zwtmgxnhwwy2beh.jpg"
+    },
+    {
+      "id": "edu-1",
+      "degree": "Bachelor of Commerce",
+      "institution": "St. Joseph's College",
+      "location": "Cuddalore, India",
+      "period": "2017 - 2020",
+      "grade": "",
+      "description": "Studied core commerce subjects including accounting, economics, business management, and finance.",
+      "logo": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764417295/portfolio/tr56rqmwtenupvff7txz.jpg"
+    }
+  ],
+  "certifications": [
+    "Front-End Development (Login-360)",
+    "HTML & CSS (Udemy)",
+    "Java Foundations (Udemy)",
+    "JavaScript (Udemy)",
+    "MySQL (Udemy)",
+    "Diploma in Computer Applications (CSC)"
+  ],
+  "awards": [
+    "Rising Star Award (2025) — Hema’s Enterprise Pvt Ltd"
+  ],
+  "languages": [
+    "Tamil",
+    "English"
+  ],
+  "links": {
+    "website_1": "https://tms.digifox.studio/",
+    "website_2": "https://tunefor2.com/",
+    "other_portfolio": "https://your-v1-portfolio.com"
+  },
+  "achievements": [
+    {
+      "id": "achievement-1763912338323",
+      "type": "award",
+      "name": "Rising Star Award",
+      "issuer": "Hema's Enterprise Pvt Ltd",
+      "date": "2025-03-16",
+      "description": "Recognition for outstanding performance",
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1764419825/portfolio/p9bh0dmiovtbesf18m8n.jpg"
+    },
+    {
+      "id": "achievement-1763921730677",
+      "type": "certification",
+      "name": "Frontend Development ",
+      "issuer": "Login-360 (Chennai)",
+      "date": "2024-02-16",
+      "description": "",
+      "image": null
+    },
+    {
+      "id": "achievement-1763921826227",
+      "type": "certification",
+      "name": "HTML & CSS",
+      "issuer": "YouAccel Training (Udemy)",
+      "date": "2023-07-03",
+      "description": "",
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1763922078/portfolio/xns2kz5gn96anb1krtkq.jpg"
+    },
+    {
+      "id": "1771184587072-44vsoq4",
+      "name": "Claude Code in Action ",
+      "issuer": "Anthropic Education ",
+      "date": "2026-02-15",
+      "description": "",
+      "image": "https://res.cloudinary.com/dkqmcnyvo/image/upload/v1771184691/portfolio/kf1jizdyiqw4a4xxdref.jpg",
+      "link": "http://verify.skilljar.com/c/k7y6p5tyd9gr"
+    }
+  ],
+  "settings": {
+    "showEducation": true
+  }
+}

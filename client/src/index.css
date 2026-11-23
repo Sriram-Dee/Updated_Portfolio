@@ -1,0 +1,295 @@
+/* ============================================
+   PREMIUM DESIGN SYSTEM - V2.0
+   Strict Token System & Fluid Typography
+============================================ */
+
+/* 1. RESET & BASE
+   ============================================ */
+@import "tailwindcss";
+
+@theme {
+  --color-accent-secondary: rgb(45 212 191);
+  --color-accent-tertiary: rgb(244 114 182);
+  --color-accent: rgb(139 92 246);
+}
+
+/* Typography - moved to :root */
+
+:root {
+  /* Premium Palette - Deep Space & Northern Lights */
+  --color-primary: 3 7 18; /* Rich Black/Blue */
+  --color-secondary: 15 23 42; /* Deep Navy */
+
+  /* Vibrant Accents */
+  /* --color-accent is now in @theme, but we keep the channels for legacy/manual rgba usage if needed
+     OR we update manual usage.
+     Existing manual: .text-primary { color: rgb(var(--color-text-primary)); }
+     
+     If we want to support existing manual RGB usage for accent, we might need a separate variable for channels.
+     But simpler: just Define custom classes for the legacy channel-based vars if used.
+     
+     Wait, if I define --color-accent in @theme, it overrides :root.
+     The value becomes rgb(139 92 246).
+     If code uses rgb(var(--color-accent)), it breaks.
+     Let's CHECK if code uses rgb(var(--color-accent)).
+  */
+  --color-accent-glow: 124 58 237;
+
+  /* Legacy mapping */
+  --color-teal: var(--color-accent-secondary);
+  --color-pink: var(--color-accent-tertiary);
+
+  --color-surface: 30 41 59; /* Slate 800 */
+  --color-surface-elevated: 51 65 85; /* Slate 700 */
+
+  /* Text Colors */
+  --color-text-primary: 248 250 252;
+  --color-text-secondary: 148 163 184;
+  --color-text-muted: 100 116 139;
+
+  /* Typography */
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Borders & Shadows */
+  --border-color: 255 255 255;
+  --border-opacity: 0.08;
+  --radius-lg: 1.5rem; /* Softer 24px */
+  --radius-xl: 2rem; /* Very soft 32px */
+
+  /* Layout */
+  --header-height: 5rem; /* Taller header */
+  --max-width: 1400px; /* Wider container */
+
+  /* Spacing Scale */
+  --spacing-container: 2rem;
+  --spacing-section: clamp(4rem, 8vw, 6rem);
+}
+
+html,
+body {
+  width: 100%;
+  position: relative;
+  /* overflow-x: hidden; */
+}
+
+/* Global Noise Texture */
+.bg-noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.15);
+
+  /* Spacing Scale */
+  --spacing-container: 2rem;
+  --spacing-section: clamp(4rem, 8vw, 6rem);
+}
+
+/* 2. CORE TYPOGRAPHY
+   Fluid scaling using clamp() for perfect responsiveness
+   ============================================ */
+:root {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+}
+
+.text-display {
+  font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.text-h1 {
+  font-size: clamp(2rem, 4vw + 1rem, 3.5rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.text-h2 {
+  font-size: clamp(1.75rem, 3vw + 1rem, 2.5rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+@layer utilities {
+  .text-primary {
+    color: rgb(var(--color-text-primary));
+  }
+  .text-secondary {
+    color: rgb(var(--color-text-secondary));
+  }
+  .text-muted {
+    color: rgb(var(--color-text-muted));
+  }
+}
+
+.text-h3 {
+  font-size: clamp(1.25rem, 2vw + 1rem, 1.75rem);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.text-small {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/* 3. LAYOUT UTILITIES
+   Strict positioning and spacing
+   ============================================ */
+body {
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
+  overflow-x: hidden;
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1.5rem, 5vw, 2rem);
+  padding-right: clamp(1.5rem, 5vw, 2rem);
+}
+
+.section {
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+  position: relative;
+}
+
+.section-alt {
+  background-color: var(--color-secondary);
+}
+
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* 4. COMPONENT CLASSES
+   Unified card and button styles
+   ============================================ */
+
+/* Cards */
+.card-base {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-glass {
+  background: rgba(30, 30, 36, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+}
+
+.glass {
+  background: rgba(30, 30, 36, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.btn-outline:hover {
+  border-color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* 5. HELPER CLASSES
+   ============================================ */
+.text-gradient {
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #c084fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

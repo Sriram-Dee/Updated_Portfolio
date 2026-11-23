@@ -1,12 +1,12 @@
 {
   "theme": {
-    "primary": "#090F0D",
-    "secondary": "#14221D",
-    "accent": "#6EE7B7",
-    "accent-secondary": "\t#A3E635",
-    "accent-tertiary": "#FDA4AF",
+    "primary": "#030712",
+    "secondary": "#0f172a",
+    "accent": "#8b5cf6",
+    "accent-secondary": "#2dd4bf",
+    "accent-tertiary": "#f472b6",
     "text-primary": "#F0FDF4",
-    "text-secondary": "#9CAFA4"
+    "text-secondary": "#94a3b8"
   },
   "profile": {
     "name": "Sriram R",

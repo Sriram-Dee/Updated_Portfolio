@@ -96,6 +96,33 @@
       "images": [],
       "demoUrl": "",
       "githubUrl": ""
+    },
+    {
+      "name": "HappiQuick — Real-Time Venue Booking Platform",
+      "technologies": "React.js, Node.js, Express.js, MongoDB, Razorpay, Docker",
+      "description": "A full-stack venue booking platform where guests search halls, place a 10-minute exclusive hold, pay via Razorpay, and receive a confirmed booking — with partners (venue owners) and admins getting their own dashboards.\n\nEngineering highlights:\n• Concurrency-safe holds using atomic MongoDB findOneAndUpdate with a unique AvailabilitySlot index, so two users can never book the same slot (race-condition proof).\n• 10-minute exclusive holds with a live countdown; expired holds auto-release (lazy + 60s cron sweep).\n• Session-conflict logic: a Full-day booking blocks Morning/Evening sessions and vice versa.\n• Idempotent payments keyed by paymentIntentId (unique index) — duplicate callbacks create only one booking.\n• Payment-after-expiry guard prevents bookings on expired holds and triggers a refund path.\n• Cancellation flow returns the slot to AVAILABLE with policy enforcement.\n• 6 automated edge-case tests (Jest + Supertest + mongodb-memory-server) covering concurrency, expiry, conflicts, and duplicate payments.",
+      "period": "August 2026",
+      "images": [],
+      "demoUrl": "",
+      "githubUrl": "https://github.com/Sriram-Dee/HappiQuick"
+    },
+    {
+      "name": "Happiffie — AI-Powered Vendor Matching Engine",
+      "technologies": "React.js, Node.js, Express.js, MongoDB, Google Gemini API, Tailwind CSS",
+      "description": "An intelligent event-management marketplace that matches hosts with verified vendors (caterers, photographers, decorators, venues, entertainers) using a hybrid AI + deterministic engine.\n\nHow it works:\n• Gemini 1.5 Flash parses unstructured natural-language requests (e.g. \"South Indian wedding in Chennai, 300 guests, ₹2.5L\") into structured JSON.\n• A deterministic backend enforces hard eligibility filters (category, date availability, travel radius, guest capacity) and ranks vendors with a transparent 7-factor weighted score (0–100%).\n• Resilient fallback: degrades to regex parsing + template rationale if the AI API times out or is unconfigured — no crashes.\n\nKey features:\n• Dual-mode Requirement Studio (natural text OR structured form).\n• \"Inspect Audit Score\" modal shows the exact math and weight distribution per vendor — fully explainable matching.\n• Vendor invitation dispatch with real-time response tracking.\n• Admin/engine control console to seed vendors and tune algorithm weights.",
+      "period": "August 2026",
+      "images": [],
+      "demoUrl": "",
+      "githubUrl": "https://github.com/Sriram-Dee/Happiffie"
+    },
+    {
+      "name": "RAG System — Document Q&A",
+      "technologies": "React.js, Node.js, Express.js, MongoDB Atlas Vector Search, Google Gemini API",
+      "description": "A full-stack Retrieval-Augmented Generation app where users upload PDF/DOCX/TXT documents and ask natural-language questions answered only from the uploaded content, with cited source chunks.\n\nPipeline (7 stages):\n• LOAD — extract text (pdf-parse v2, mammoth, fs).\n• SPLIT — sliding-window overlapping chunking.\n• EMBED — Gemini gemini-embedding-001 (3072-dim vectors).\n• STORE — MongoDB Atlas with { text, embedding, sourceName }.\n• RETRIEVE — embed the question → MongoDB $vectorSearch (ANN, cosine) with optional sourceName filter.\n• AUGMENT — inject retrieved chunks + question into the prompt.\n• GENERATE — Gemini synthesizes the answer and cites sources.\n\nHighlights:\n• Reused MongoDB Atlas as the vector DB (no separate infra) — vector index with 3072 dims + cosine similarity + sourceName filter field.\n• Free-tier Gemini for both embeddings and generation (reproducible by anyone, no credit card).\n• Source-scoped retrieval: query one document or the whole knowledge base.",
+      "period": "September 2026",
+      "images": [],
+      "demoUrl": "",
+      "githubUrl": "https://github.com/Sriram-Dee/RAG_System"
     }
   ],
   "experience": [

@@ -112,7 +112,9 @@
       "technologies": "React.js, Web Speech API, Tailwind CSS, Gemini CLI, Claude Code",
       "description": "A specialized voice automation system for Tamil retail environments, built to bridge the language gap in digital tools. Engineered using Gemini CLI and Claude Code, this project features React-driven text-to-speech synthesis and precise audio scheduling. The development process utilized advanced LLMs to rapidly solve complex language processing challenges and ensure natural-sounding Tamil output.",
       "period": "Jan 2026",
-      "images": [],
+      "images": [
+        "https://raw.githubusercontent.com/Sriram-Dee/Updated_Portfolio/v2_portfolio/screenshots/mockup_tamil_announcer.png"
+      ],
       "demoUrl": "https://shop-announcer-demo.vercel.app",
       "github": "https://github.com/Sriram-Dee/tamil-shop-announcer",
       "enabled": true
